@@ -139,47 +139,18 @@ source("R/my-function.R")
 #> List of polygons loaded [list_pol]
 ```
 
-#### Entrada com a Base: `emissions-sources.rds`
+#### Definindo estados
 
 ``` r
 my_states <- c("MS","MT","GO","DF")
+```
+
+#### Entrada com a Base: `emissions-sources.rds`
+
+``` r
 emissions_sources <- read_rds("data/emissions-sources.rds")|> 
   filter(sigla_uf %in% my_states)
 glimpse(emissions_sources)
-#> Rows: 265,375
-#> Columns: 32
-#> $ source_id                 <int> 10812934, 10812934, 10812934, 10812934, 1081…
-#> $ source_name               <chr> "Abadia de Goiás", "Abadia de Goiás", "Abadi…
-#> $ source_type               <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
-#> $ iso3_country              <chr> "BRA", "BRA", "BRA", "BRA", "BRA", "BRA", "B…
-#> $ original_inventory_sector <chr> "cropland-fires", "cropland-fires", "croplan…
-#> $ start_time                <date> 2015-01-01, 2015-01-01, 2015-01-01, 2015-01…
-#> $ end_time                  <date> 2015-12-31, 2015-12-31, 2015-12-31, 2015-12…
-#> $ lat                       <dbl> -16.78557, -16.78557, -16.78557, -16.78557, …
-#> $ lon                       <dbl> -49.4521, -49.4521, -49.4521, -49.4521, -49.…
-#> $ geometry_ref              <chr> "gadm_BRA.9.1_2", "gadm_BRA.9.1_2", "gadm_BR…
-#> $ gas                       <chr> "ch4", "co2", "co2e_100yr", "co2e_20yr", "n2…
-#> $ emissions_quantity        <dbl> 1.469264e+00, 8.244216e+02, 8.747847e+02, 9.…
-#> $ temporal_granularity      <chr> "annual", "annual", "annual", "annual", "ann…
-#> $ created_date              <date> 2023-10-06, 2023-10-06, 2023-10-06, 2023-10…
-#> $ modified_date             <date> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
-#> $ directory                 <chr> "data-raw/BRA/agriculture/cropland-fires_emi…
-#> $ activity                  <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
-#> $ activity_units            <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
-#> $ emissions_factor          <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
-#> $ emissions_factor_units    <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
-#> $ capacity                  <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
-#> $ capacity_units            <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
-#> $ capacity_factor           <dbl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
-#> $ year                      <dbl> 2015, 2015, 2015, 2015, 2015, 2016, 2016, 20…
-#> $ sector_name               <chr> "agriculture", "agriculture", "agriculture",…
-#> $ sub_sector                <chr> "cropland-fires", "cropland-fires", "croplan…
-#> $ sigla_uf                  <chr> "GO", "GO", "GO", "GO", "GO", "GO", "GO", "G…
-#> $ nome_regiao               <chr> "Centro-Oeste", "Centro-Oeste", "Centro-Oest…
-#> $ biome                     <chr> "CERR", "CERR", "CERR", "CERR", "CERR", "CER…
-#> $ flag_indigenous           <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FA…
-#> $ flag_conservation         <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FA…
-#> $ city_ref                  <chr> "Abadia De Goiás", "Abadia De Goiás", "Abadi…
 ```
 
 #### Entrada com a Base: `nasa-xco2.rds`
@@ -188,23 +159,6 @@ glimpse(emissions_sources)
 nasa_xco2 <- read_rds("data/nasa-xco2.rds") |> 
   filter(state %in% my_states)
 glimpse(nasa_xco2)
-#> Rows: 378,473
-#> Columns: 15
-#> $ longitude         <dbl> -53.55216, -53.53052, -53.58393, -53.57360, -53.5886…
-#> $ latitude          <dbl> -17.78172, -17.66517, -17.64105, -17.55926, -17.4514…
-#> $ time              <dbl> 1410110439, 1410110440, 1410110441, 1410110442, 1410…
-#> $ date              <date> 2014-09-07, 2014-09-07, 2014-09-07, 2014-09-07, 201…
-#> $ year              <dbl> 2014, 2014, 2014, 2014, 2014, 2014, 2014, 2014, 2014…
-#> $ month             <dbl> 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9…
-#> $ day               <int> 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7…
-#> $ xco2              <dbl> 397.6308, 400.0303, 397.4599, 397.8412, 397.5515, 39…
-#> $ xco2_quality_flag <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
-#> $ xco2_incerteza    <dbl> 0.5256661, 0.6178920, 0.5998411, 0.5249712, 0.551944…
-#> $ path              <chr> "oco2_LtCO2_140907_B11100Ar_230523232629s.nc4", "oco…
-#> $ flag_br           <lgl> TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE…
-#> $ flag_nordeste     <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FAL…
-#> $ state             <chr> "MT", "MT", "MT", "MT", "MT", "MT", "MT", "MT", "MT"…
-#> $ city_ref          <chr> "Alto Araguaia", "Alto Araguaia", "Alto Araguaia", "…
 ```
 
 #### Filtrando os polígonos do municípios
@@ -250,6 +204,8 @@ pol_df <- states |> filter(abbrev_state == "DF") |>
 # write_rds(nasa_xco2,"data/nasa-xco2.rds")
 ```
 
+#### Gerar mapa
+
 ``` r
 my_year = 2015
 municipality |> 
@@ -287,32 +243,26 @@ municipality |>
   scale_fill_viridis_c()
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
-
-#### Criando o grid para valores não amostrados
+#### Criando o grid (malha de pontos)para valores não amostrados
 
 ``` r
 # vetores para coordenadas x e y selecionadas da base do IBGE1
+# Extrair coordenadas da base nasa_xco2 para definir extensão do grid
 x<-nasa_xco2$longitude
 y<-nasa_xco2$latitude
-dis <- 0.5 # distância para o adensamento de pontos nos estados
-grid_geral <- expand.grid(
-  X=seq(min(x),max(x),dis),
+dis <- 0.5 # distância (do grid) para adensamento de pontos nos estados
+grid_geral <- expand.grid( # Criar malha regular
+  X=seq(min(x),max(x),dis), # Combinar cada x e y
   Y=seq(min(y),max(y),dis)) |>
-  mutate(
+  mutate( #teste ponto-no-polígono, TRUE se (X,Y) caem no polígono
     flag_ms = def_pol(X, Y, pol_ms),
     flag_mt = def_pol(X, Y, pol_mt),
     flag_go = def_pol(X, Y, pol_go),
     flag_df = def_pol(X, Y, pol_df)
   ) |>
-  filter(flag_ms | flag_go | flag_mt | flag_df) |> 
-  select(-c(flag_ms,flag_mt,flag_go,flag_df))
+  filter(flag_ms | flag_go | flag_mt | flag_df) |> # manter pontos correspondentes ao menos 1 dos limites
+  select(-c(flag_ms,flag_mt,flag_go,flag_df)) # remover colunas criadas
 plot(grid_geral)
-```
-
-![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
-
-``` r
 sp::gridded(grid_geral) = ~ X + Y
 ```
 
@@ -320,16 +270,16 @@ sp::gridded(grid_geral) = ~ X + Y
 
 ``` r
 df_aux <- nasa_xco2 |> 
-  group_by(longitude, latitude) |> 
   filter(year == my_year) |> 
+  group_by(longitude, latitude) |> 
   summarise(
-    xco2 = mean(xco2,na.rm=TRUE),
+    xco2 = mean(xco2,na.rm=TRUE), # média xco2
     .groups = "drop"
   ) |> sample_n(10000) 
-sp::coordinates(df_aux) = ~ longitude + latitude
+sp::coordinates(df_aux) = ~ longitude + latitude # Converter data frame para objeto espacial - atribuir as colunas longitude/latitude como coordenadas. Várias funções de geoestatística do pacote gstat (como variogram() e krige()) não aceitam um data.frame, mas um objeto com coordenadas. Agora, a variável xco2 passa a ser o atributo associado a cada ponto espacial.
 form <- xco2 ~ 1
 vari_exp <- gstat::variogram(form, data = df_aux,
-                      cressie = FALSE,
+                      cressie = FALSE, #estimador clássico do semivar.
                       cutoff = 1, # distância máxima 8
                       width = 0.075) # distancia entre pontos
 vari_exp  |>
@@ -339,8 +289,6 @@ vari_exp  |>
        y=expression(paste(gamma,"(h)")))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
-
 ``` r
 patamar=1.4
 alcance=0.2
@@ -349,14 +297,8 @@ modelo_1 <- fit.variogram(vari_exp,vgm(patamar,"Sph",alcance,epepita))
 modelo_2 <- fit.variogram(vari_exp,vgm(patamar,"Exp",alcance,epepita))
 modelo_3 <- fit.variogram(vari_exp,vgm(patamar,"Gau",alcance,epepita))
 plot_my_models(modelo_1,modelo_2,modelo_3)
+modelo <- modelo_1 ## sempre modificar
 ```
-
-![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-10-3.png)<!-- -->
-
-    #>   model      psill     range
-    #> 1   Nug 1.12513016  0.000000
-    #> 2   Gau 0.05855026 -3.884188
-    modelo <- modelo_1 ## sempre modificar
 
 ``` r
 ko_variavel <- krige(formula=form, df_aux, grid_geral, model=modelo,
@@ -365,8 +307,6 @@ ko_variavel <- krige(formula=form, df_aux, grid_geral, model=modelo,
                      na.action=na.pass,
                      debug.level=-1
 )
-#> [using ordinary kriging]
-#>   0% done  2% done  4% done  7% done  9% done 11% done 13% done 16% done 18% done 21% done 23% done 25% done 27% done 30% done 32% done 34% done 36% done 38% done 41% done 43% done 45% done 47% done 50% done 52% done 54% done 56% done 59% done 61% done 63% done 66% done 68% done 70% done 73% done 75% done 77% done 80% done 82% done 84% done 87% done 89% done 91% done 94% done 96% done 98% done100% done
 ```
 
 ``` r
@@ -382,8 +322,6 @@ ko_variavel |>
        title = my_year) +
   theme_bw()
 ```
-
-![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 ``` r
 df_kgr <- ko_variavel |> 
@@ -460,8 +398,6 @@ municipality |>
        y = 'Latitude') +
   scale_fill_viridis_c()
 ```
-
-![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ### Estimativa de XCO2 para o Brasil Central
 
@@ -582,50 +518,7 @@ map(2015:2023,~{
          y = 'Latitude',
          title = .x) +
     scale_fill_viridis_c()})
-#> [[1]]
 ```
-
-![](README_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
-
-    #> 
-    #> [[2]]
-
-![](README_files/figure-gfm/unnamed-chunk-17-2.png)<!-- -->
-
-    #> 
-    #> [[3]]
-
-![](README_files/figure-gfm/unnamed-chunk-17-3.png)<!-- -->
-
-    #> 
-    #> [[4]]
-
-![](README_files/figure-gfm/unnamed-chunk-17-4.png)<!-- -->
-
-    #> 
-    #> [[5]]
-
-![](README_files/figure-gfm/unnamed-chunk-17-5.png)<!-- -->
-
-    #> 
-    #> [[6]]
-
-![](README_files/figure-gfm/unnamed-chunk-17-6.png)<!-- -->
-
-    #> 
-    #> [[7]]
-
-![](README_files/figure-gfm/unnamed-chunk-17-7.png)<!-- -->
-
-    #> 
-    #> [[8]]
-
-![](README_files/figure-gfm/unnamed-chunk-17-8.png)<!-- -->
-
-    #> 
-    #> [[9]]
-
-![](README_files/figure-gfm/unnamed-chunk-17-9.png)<!-- -->
 
 <!-- 
 #### Entrada com a Base: `gosat-xch4.rds`
@@ -669,7 +562,8 @@ gosat_xch4$city_ref <- resul
 write_rds(gosat_xch4,"data-raw/gosat_xch4.rds")
 ```
 &#10;
-``` r
+#### Gerar mapa
+&#10;``` r
 my_year = 2021
 municipality |> 
   filter(abbrev_state %in% my_states) |> 
@@ -706,49 +600,26 @@ municipality |>
   scale_fill_viridis_c()
 &#10;# unity ppb
 ```
-&#10;#### Entrada com a Base: `oco2-sif.rds`
-&#10;``` r
-# original archive "oco-sif.rds" = 9,8mb
-&#10;# DADOS DA SIF SOMENTE ATÉ O ANO DE 2020 VERIFICAR
-&#10;oco2_sif <- read_rds("data/oco2-sif.rds") |> 
-  filter(state %in% my_states)
+&#10;-->
+
+#### Entrada com a Base: `oco2-sif.rds`
+
+``` r
+oco2_sif <- read_rds("data/oco2-sif.rds")
+
 glimpse(oco2_sif)
 ```
-&#10;
+
 ``` r
-oco2_sif |> 
-  filter(year == 2020) |> 
+oco2_sif |>
+  filter(year == 2022,
+         state == my_states) |>  # Brasil Central
   ggplot(aes(x=longitude,y=latitude)) +
   geom_point()
 ```
-&#10;#### Classificando cada ponto em município
-&#10;``` r
-resul <- vector()
-&#10;estado <- oco2_sif$state
-for(i in 1:nrow(oco2_sif)){
-  if(estado[i]!="Other"){
-    my_citys_obj <- municipality %>%
-      filter(abbrev_state == estado[i])
-    n_citys <- nrow(my_citys_obj)
-    my_citys_names <- my_citys_obj %>% pull(name_muni)
-    resul[i] <- "Other"
-    for(j in 1:n_citys){
-      pol_city <- my_citys_obj$geom  %>%
-        purrr::pluck(j) %>%
-        as.matrix()
-      if(def_pol(oco2_sif$longitude[i],
-                 oco2_sif$latitude[i],
-                 pol_city)){
-        resul[i] <- my_citys_names[j]
-      }
-    }
-  }
-}
-oco2_sif$city_ref <- resul
-glimpse(oco2_sif)
-write_rds(oco2_sif,"data-raw/oco2_sif.rds")
-```
-&#10;
+
+#### Gerar mapa
+
 ``` r
 my_year = 2020
 municipality |> 
@@ -757,7 +628,7 @@ municipality |>
     oco2_sif |> 
       group_by(year, city_ref) |> 
       summarise(
-        sif = mean(sif,na.rm=TRUE),
+        daily_sif757 = mean(daily_sif757,na.rm=TRUE),
         .groups = "drop"
       ) |> 
       rename(name_muni = city_ref),
@@ -765,7 +636,7 @@ municipality |>
   ) |> 
   filter(year == my_year) |> 
   ggplot()  +
-  geom_sf(aes(fill=sif), color="transparent",
+  geom_sf(aes(fill=daily_sif757), color="transparent",
           size=.05, show.legend = TRUE)  +
   geom_point(data = oco2_sif |> 
                filter(year==my_year), 
@@ -780,63 +651,77 @@ municipality |>
     legend.text = element_text(size = rel(1), color = "black"),
     legend.title = element_text(face = 'bold', size = rel(1.2))
   ) +
-  labs(fill = 'Sif',
+  labs(fill = 'SIF757',
        x = 'Longitude',
        y = 'Latitude') +
   scale_fill_viridis_c()
-&#10;# unity W m-2 sr-1 μm-1 
 ```
-&#10;#### Entrada com a Base: `appeears-modis.rds`
-&#10;``` r
+
+#### Entrada com a Base: `appeears-modis.rds`
+
+``` r
 # original archive "appeears-modis.rds" = 8,7mb
 # appeears data requisited by API (project fapesp)
-&#10;appeears_modis <- read_rds("data/appeears-modis.rds") 
+
+appeears_modis <- read_rds("data/appeears-modis.rds") 
   # don't have "state" column - previously filtred
 glimpse(appeears_modis)
-&#10;# variables: FPAR, LAI, TE, EVI, NDVI
+
+# variables: FPAR, LAI, TE, EVI, NDVI
 ```
-&#10;
+
 ``` r
 appeears_modis |> 
   filter(year == 2020) |> 
   ggplot(aes(x=lon,y=lat)) +
   geom_point()
 ```
-&#10;#### Classificando cada ponto em município
-&#10;``` r
+
+#### Classificando cada ponto em município
+
+``` r
 library(sf)
 library(dplyr)
 library(lwgeom) # para st_make_valid
-&#10;# 1. Garantir que shapefile de municípios está no mesmo CRS e válido
+
+# 1. Garantir que shapefile de municípios está no mesmo CRS e válido
 municipality_sf <- municipality %>%
   st_transform(crs = 4326) %>%
   st_make_valid()
-&#10;# 2. Converter seu data frame para sf sem perder colunas
+
+# 2. Converter seu data frame para sf sem perder colunas
 appeears_modis_sf <- st_as_sf(
   appeears_modis,
   coords = c("lon", "lat"),
   crs = 4326,
   remove = FALSE # mantém as colunas originais lon/lat
 )
-&#10;# 3. Fazer o join espacial
+
+# 3. Fazer o join espacial
 appeears_modis_sf <- st_join(
   appeears_modis_sf,
   municipality_sf %>% select(name_muni),
   join = st_within
 )
-&#10;# 4. Criar coluna "city_ref", substituindo NA por "Other"
+
+# 4. Criar coluna "city_ref", substituindo NA por "Other"
 appeears_modis_sf <- appeears_modis_sf %>%
   mutate(city_ref = ifelse(is.na(name_muni), "Other", name_muni)) %>%
   select(-name_muni) # remove coluna original se não quiser duplicada
-&#10;# 5. Converter de volta para data frame se não quiser manter como sf
+
+# 5. Converter de volta para data frame se não quiser manter como sf
 appeears_modis <- as.data.frame(appeears_modis_sf)
-&#10;# Conferir
+
+# Conferir
 glimpse(appeears_modis)
-&#10;# Salvar
-write_rds(appeears_modis, "data-raw/appeears_modis.rds")
+
+# Salvar
+# write_rds(appeears_modis, "data-raw/appeears_modis.rds")
 ```
-&#10;
-&#10;``` r
+
+#### Gerar mapa
+
+``` r
 my_year = 2023
 municipality |> 
   filter(abbrev_state %in% my_states) |> 
@@ -872,47 +757,60 @@ municipality |>
        y = 'Latitude') +
   scale_fill_viridis_c(limit = c(-1, 1))
 ```
-&#10;#### Entrada com a Base: `nasa-power.rds`
-&#10;``` r
+
+#### Entrada com a Base: `nasa-power.rds`
+
+``` r
 # original archive "nasa-power.rds" = 174,6mb
-&#10;nasa_power <- read_rds("data/nasa-power.rds")
+
+nasa_power <- read_rds("data/nasa-power.rds")
   # don't have "state" column - previously filtred
 glimpse(nasa_power)
-&#10;# Temperatura (t2m), precipitação (prectotcorr), radiação solar (allsky) e umidade relativa a 2 m (rh2m), velocidade do vento a 2 metros (ws2m) e pressão na superfície (ps).
+
+# Temperatura (t2m), precipitação (prectotcorr), radiação solar (allsky) e umidade relativa a 2 m (rh2m), velocidade do vento a 2 metros (ws2m) e pressão na superfície (ps).
 ```
-&#10;
+
 ``` r
 nasa_power |> 
   filter(year == 2023) |> 
   ggplot(aes(x=lon,y=lat)) +
   geom_point()
 ```
-&#10;#### Classificando cada ponto em município
-&#10;``` r
+
+#### Classificando cada ponto em município
+
+``` r
 municipality_sf <- municipality %>%
   st_transform(crs = 4326) %>%
   st_make_valid()
-&#10;nasa_power_sf <- st_as_sf(
+
+nasa_power_sf <- st_as_sf(
   nasa_power,
   coords = c("lon", "lat"),
   crs = 4326,
   remove = FALSE # mantém as colunas originais lon/lat
 )
-&#10;nasa_power_sf <- st_join(
+
+nasa_power_sf <- st_join(
   nasa_power_sf,
   municipality_sf %>% select(name_muni),
   join = st_within
 )
-&#10;nasa_power_sf <- nasa_power_sf %>%
+
+nasa_power_sf <- nasa_power_sf %>%
   mutate(city_ref = ifelse(is.na(name_muni), "Other", name_muni)) %>%
   select(-name_muni)
-&#10;nasa_power <- as.data.frame(nasa_power_sf)
-&#10;# Conferir
+
+nasa_power <- as.data.frame(nasa_power_sf)
+
 glimpse(nasa_power)
-&#10;# Salvar
+
+# Salvar
 write_rds(nasa_power, "data-raw/nasa_power.rds")
 ```
-&#10;
+
+#### Gerar mapa
+
 ``` r
 my_year = 2023
 municipality |> 
@@ -949,14 +847,19 @@ municipality |>
        y = 'Latitude') +
   scale_fill_viridis_c() #limits = c(22, 30)
 ```
-&#10;#### Entrada com a Base: `deter-queimadas.rds`
-&#10;``` r
+
+#### Entrada com a Base: `deter-queimadas.rds`
+
+``` r
 # original archive "deter-queimadas.rds" = 122,1mb
-&#10;deter_queimadas <- read_rds("data/deter-queimadas.rds") 
-&#10;glimpse(deter_queimadas)
-&#10;# Essa base tem os municípios definidos, no entanto alguns estão classificados como "NA" Deve-se classificá-los com base nas coordenadas de longitude e latitude
+
+deter_queimadas <- read_rds("data/deter-queimadas.rds") 
+
+glimpse(deter_queimadas)
+
+# Essa base tem os municípios definidos, no entanto alguns estão classificados como "NA" Deve-se classificá-los com base nas coordenadas de longitude e latitude
 ```
-&#10;
+
 ``` r
 deter_queimadas |> 
   # pull(ANO) |> unique()
@@ -964,42 +867,46 @@ deter_queimadas |>
   ggplot(aes(x=x,y=y)) +
   geom_point()
 ```
-&#10;
+
 #### Classificando cada ponto em município
-&#10;``` r
+
+``` r
 library(sf)
 library(dplyr)
 library(lwgeom) # para st_make_valid
-&#10;# 1. Garantir que shapefile de municípios está no mesmo CRS e válido
+
 municipality_sf <- municipality %>%
   st_transform(crs = 4326) %>%
   st_make_valid()
-&#10;# 2. Converter seu data frame para sf sem perder colunas
+
 deter_queimadas_sf <- st_as_sf(
   deter_queimadas,
   coords = c("x", "y"),
   crs = 4326,
   remove = FALSE # mantém as colunas originais lon/lat
 )
-&#10;# 3. Fazer o join espacial
+
 deter_queimadas_sf <- st_join(
   deter_queimadas_sf,
   municipality_sf %>% select(name_muni),
   join = st_within
 )
-&#10;# 4. Criar coluna "city_ref", substituindo NA por "Other"
+
 deter_queimadas_sf <- deter_queimadas_sf %>%
   mutate(city_ref = ifelse(is.na(name_muni), "Other", name_muni)) %>%
   select(-name_muni) # remove coluna original se não quiser duplicada
-&#10;# 5. Converter de volta para data frame se não quiser manter como sf
+
 deter_queimadas <- as.data.frame(deter_queimadas_sf)
-&#10;# Conferir
+
 glimpse(deter_queimadas)
-&#10;# Salvar
+
+# Salvar
 write_rds(deter_queimadas, "data-raw/deter_queimadas.rds")
 ```
-&#10;
-&#10;``` r
+
+#### Gerar mapa
+
+``` r
 my_year = 2020
 municipality |> 
   filter(abbrev_state %in% my_states) |> 
@@ -1035,14 +942,18 @@ municipality |>
        y = 'Latitude') +
   scale_fill_viridis_c()
 ```
-&#10;#### Entrada com a Base: `prodes-deforestation.rds`
-&#10;``` r
-# original archive "prodes-deforestation.rds" = 2,2gb
-&#10;prodes_deforestation <- read_rds("data/prodes-deforestation.rds")
+
+#### Entrada com a Base: `prodes-deforestation.rds`
+
+``` r
+# original archive "prodes-deforestation.rds" = 2.2gb
+
+prodes_deforestation <- read_rds("data/prodes-deforestation.rds")
   # "state" column previously filtred 
-&#10;glimpse(prodes_deforestation)
+
+glimpse(prodes_deforestation)
 ```
-&#10;
+
 ``` r
 prodes_deforestation |> 
   # pull(ANO) |> unique()
@@ -1050,40 +961,45 @@ prodes_deforestation |>
   ggplot(aes(x=x,y=y)) +
   geom_point()
 ```
-&#10;#### Classificando cada ponto em município
-&#10;``` r
+
+#### Classificando cada ponto em município
+
+``` r
 library(sf)
 library(dplyr)
 library(lwgeom) # para st_make_valid
-&#10;# 1. Garantir que shapefile de municípios está no mesmo CRS e válido
+
 municipality_sf <- municipality %>%
   st_transform(crs = 4326) %>%
   st_make_valid()
-&#10;# 2. Converter seu data frame para sf sem perder colunas
+
 prodes_deforestation_sf <- st_as_sf(
   deter_queimadas,
   coords = c("x", "y"),
   crs = 4326,
   remove = FALSE # mantém as colunas originais lon/lat
 )
-&#10;# 3. Fazer o join espacial
+
 prodes_deforestation_sf <- st_join(
   deter_queimadas_sf,
   municipality_sf %>% select(name_muni),
   join = st_within
 )
-&#10;# 4. Criar coluna "city_ref", substituindo NA por "Other"
+
 prodes_deforestation_sf <- prodes_deforestation_sf %>%
   mutate(city_ref = ifelse(is.na(name_muni), "Other", name_muni)) %>%
   select(-name_muni) # remove coluna original se não quiser duplicada
-&#10;# 5. Converter de volta para data frame se não quiser manter como sf
+
 prodes_deforestation <- as.data.frame(prodes_deforestation_sf)
-&#10;# Conferir
+
 glimpse(prodes_deforestation)
-&#10;# Salvar
+
+# Salvar
 write_rds(prodes_deforestation, "data-raw/prodes_deforestation.rds")
 ```
-&#10;
+
+#### Gerar mapa
+
 ``` r
 my_year = 2023 # "categorie" column
 municipality |> 
@@ -1120,4 +1036,5 @@ municipality |>
        y = 'Latitude') +
   scale_fill_viridis_c()
 ```
--->
+
+–\>

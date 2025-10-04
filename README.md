@@ -130,15 +130,11 @@ Formato dos arquivos:
 
 ``` r
 library(tidyverse)
-library(ggridges)
-library(ggpubr)
 library(geobr)
 library(gstat)
-library(vegan)
 library(sf)
 library(dplyr)
-library(lwgeom) # para st_make_valid
-source("R/my-function.R")
+source("R/my-function.R") 
 #> List of polygons loaded [list_pol]
 ```
 
@@ -151,7 +147,7 @@ my_states <- c("MS","MT","GO","DF")
 ### 💨 Entrada com a Base: `emissions-sources.rds`
 
 ``` r
-emissions_sources <- read_rds("data/emissions-sources.rds")|> 
+emissions_sources <- read_rds("../data/emissions-sources.rds")|> 
   filter(sigla_uf %in% my_states)
 glimpse(emissions_sources)
 ```
@@ -171,7 +167,7 @@ pol_df <- states |> filter(abbrev_state == "DF") |>
   pull(geom) |> pluck(1) |> as.matrix()
 ```
 
-\##W Carregando as bases
+### Carregando as bases
 
 ``` r
 file_kgr <- list.files("data-raw/",
@@ -208,46 +204,16 @@ read_kgr <- function(path){
 #> # ℹ 3,805 more rows
 
 data_set_kgr <- map_df(file_kgr,read_kgr)
-data_set_kgr |> 
+data_set_kgr2 <- data_set_kgr |> 
   group_by(year, state, city_ref, variable) |> 
   summarise(
     value_mean = mean(value, na.rm=TRUE),
-    .groups = "drop") |> 
+    .groups = "drop") |>
   pivot_wider(names_from = variable, values_from = value_mean)
-#> # A tibble: 3,281 × 13
-#>     year state city_ref  precipitacao pressao radiacao sif_757   t2m temperatura
-#>    <int> <chr> <chr>            <dbl>   <dbl>    <dbl>   <dbl> <dbl>       <dbl>
-#>  1  2015 DF    Brasília          2.62    90.7     20.5   0.234  23.2        23.2
-#>  2  2015 GO    Abadiânia        NA       NA       NA    NA      NA          NA  
-#>  3  2015 GO    Acreúna           3.33    94.4     19.8   0.241  24.7        24.7
-#>  4  2015 GO    Alexânia         NA       NA       NA    NA      NA          NA  
-#>  5  2015 GO    Alto Par…        NA       NA       NA    NA      NA          NA  
-#>  6  2015 GO    Alvorada…        NA       NA       NA     0.153  NA          NA  
-#>  7  2015 GO    Amaralina         2.71    97.1     20.4  NA      27.9        27.9
-#>  8  2015 GO    Amorinóp…        NA       NA       NA     0.229  NA          NA  
-#>  9  2015 GO    Anicuns           3.25    93.5     20.1  NA      24.6        24.6
-#> 10  2015 GO    Anápolis          3.30    90.7     20.2  NA      22.9        22.9
-#> # ℹ 3,271 more rows
-#> # ℹ 4 more variables: umidade <dbl>, vento <dbl>, xch4 <dbl>, xco2 <dbl>
 
-data_set_kgr |> 
-  group_by(year,state) |> 
-  count()
-#> # A tibble: 36 × 3
-#> # Groups:   year, state [36]
-#>     year state     n
-#>    <int> <chr> <int>
-#>  1  2015 DF       21
-#>  2  2015 GO     1147
-#>  3  2015 MS     1240
-#>  4  2015 MT     3026
-#>  5  2016 DF       21
-#>  6  2016 GO     1147
-#>  7  2016 MS     1240
-#>  8  2016 MT     3026
-#>  9  2017 DF       21
-#> 10  2017 GO     1147
-#> # ℹ 26 more rows
+# data_set_kgr |>
+#   group_by(year,state) |>
+#   count()
 ```
 
 ## Criar os mapas por variáveis por ano… como a base do geobr
@@ -255,3 +221,132 @@ data_set_kgr |>
 ## para verifcar os municípios não plotados
 
 vamos ver onde estão os NA
+
+``` r
+my_year <- 2015
+variavel <- "xch4"
+anos <- if (variavel == "xch4") 2015:2021 else 2015:2023
+
+mapas <- map(anos, function(my_year) {
+  municipality |> 
+    filter(abbrev_state %in% my_states) |> 
+    left_join( 
+      data_set_kgr_bind2 |>
+        filter(variavel == all_of(variavel),
+               state %in% my_states) |> 
+        group_by(year, city_ref) |> 
+        rename(name_muni = city_ref),
+      by = c("name_muni")
+    ) |> 
+    filter(year == my_year) |> 
+    ungroup() |> 
+    ggplot()  +
+    geom_sf(aes(fill = variavel), color="transparent",
+            size=.05, show.legend = TRUE) +
+    labs(title = paste("Ano:", my_year, "-", variavel))
+  
+})
+
+mapas[[1]]
+
+# municipality |>
+#   filter(abbrev_state %in% my_states) |> 
+#   ggplot() +
+#   geom_sf() +
+#   geom_point(data = data_set_kgr,
+#              aes(x = lon, y = lat, color = "red"))
+```
+
+### Testando kgrs individualmente para verificar NAs
+
+``` r
+# Goiás: 246 municípios <- PROBLEMA AQUI, todas as bases com menos de 90 municípios (confirmando o plot das cidades faltantes)
+# Mato Grosso: 141 municípios
+# Mato Grosso do Sul: 77 municípios
+
+gosat <- read_rds("data/gosat_xch4_bind.rds")     
+xco2 <- read_rds("data/nasa-xco2-bind.rds")              
+sif <- read_rds("data/oco2-sif-bind.rds")  
+
+glimpse(sif) |> 
+  filter(state == "GO") |> 
+  pull(city_ref) |> unique()
+
+gosat |> 
+  ggplot() +
+  geom_point(aes(x = longitude, y = latitude))
+
+np_ps |> 
+  ggplot() +
+  geom_point(aes(x = lon, y = lat))
+
+sif |> 
+  ggplot() +
+  geom_point(aes(x = longitude, y = latitude))
+
+xco2 |> 
+  ggplot() +
+  geom_point(aes(x = longitude, y = latitude))
+```
+
+Foram verificados: 1. Classificação por estado e municípios das bases 2.
+Adição da base 3. Krigagem
+
+Desde a varificação 1, observa-se somente cerca de 90 observações para
+os municípios do estado de GO, estando ausentes mais de 150 municípios.
+Não foram verificados problemas em nenhuma destas verificações.
+
+O problema esta que, a krigagem é feita, mas não adicionam os valores
+observados, apenas é possível visualizá-los no plot, ou seja, o arquivo
+kgr.rds gerado não contém tais dados, ficando como “NA”.
+
+Para resolver, deve-se agregar a krigagem à geometria municipal para que
+todos os municípios sejam preenchidos.  
+Isto ja havia sido feito em “nasa_xco2_bind”, no entanto, não foi este o
+arquivo kgr salvo na pasta data-raw, logo gerando os NAs mesmo após a
+krigagem. Sendo assim, basta salvar fazer o bind e salvar os arquivos de
+cada variável
+
+### Carregando as bases
+
+``` r
+file_kgr_bind <- list.files("data/",
+                      full.names = TRUE,pattern = "bind")
+new_names_b = c(lat = "latitude", lon = "longitude")
+
+read_kgr <- function(path){
+  df <- readr::read_rds(path) |> 
+    janitor::clean_names() |> 
+    dplyr::rename(dplyr::any_of(new_names_b))
+  
+  nome <- df[3] |> names()    
+  new_name_b <- c(value = nome)
+  df <- df |> 
+    mutate(
+      variable = nome
+    ) |> 
+    dplyr::rename(dplyr::any_of(new_name_b))
+  return(df)  
+};read_kgr(file_kgr_bind[1])
+
+data_set_kgr_bind <- map_df(file_kgr_bind,read_kgr)
+data_set_kgr_bind2 <- data_set_kgr_bind |> 
+  filter(year >= 2015,
+         state %in% my_states) |> 
+  group_by(year, state, city_ref, variable) |> 
+  summarise(
+    value_mean = mean(value, na.rm=TRUE),
+    .groups = "drop") |>
+  pivot_wider(names_from = variable, values_from = value_mean)
+
+# data_set_kgr_bind |> 
+#   group_by(year,state) |> 
+#   count()
+# 
+data_set_kgr_bind2 |>
+  select(variable, city_ref) |>
+  pull(city_ref) |> unique() |> sort()
+
+# sum(is.na(data_set_kgr_bind2))
+# sum(is.na(data_set_kgr2))
+```

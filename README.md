@@ -471,10 +471,10 @@ base_completa_set <- base_completa_set_tend |>
 ```
 
 A base de dados do GOSAT disponibiliza informações de XCH₄ até o ano de
-2021. Para possibilitar a análise de regressão, realizou-se a predição
-dos valores para 2022 e 2023 por meio do método de regressão linear
-simples, utilizando os dados observados no período de 2015 a 2021 como
-base de treinamento.
+2021. Para possibilitar as análises, realizou-se a predição dos valores
+para 2022 e 2023 por meio do método de regressão linear simples,
+utilizando os dados observados no período de 2015 a 2021 como base de
+treinamento.
 
 ``` r
 city_ref <- base_completa_set$city_ref |> unique()

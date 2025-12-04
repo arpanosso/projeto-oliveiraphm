@@ -770,11 +770,11 @@ vari_exp &lt;- gstat::variogram(form, data = df_aux,
                       cressie = FALSE, #estimador clássico do semivar.
                       cutoff = 1, # distância máxima = 8
                       width = 0.075) # distancia entre pontos
-vari_exp  |&gt;
-  ggplot(aes(x=dist, y=gamma)) +
-  geom_point() +
-  labs(x=&quot;lag (º)&quot;,
-       y=expression(paste(gamma,&quot;(h)&quot;)))</code></pre>
+# vari_exp  |&gt;
+#   ggplot(aes(x=dist, y=gamma)) +
+#   geom_point() +
+#   labs(x=&quot;lag (º)&quot;,
+#        y=expression(paste(gamma,&quot;(h)&quot;)))</code></pre>
 <pre class="r"><code>patamar=1.4
 alcance=0.2
 epepita=0.5
@@ -2041,7 +2041,7 @@ nome_variavel &lt;- map_df(2015:2023,~{
         mutate(year = .x)
   return(df_final)
 })
-write_rds(nome_variavel,paste0(&quot;../data-raw/nasa-power-&quot;,variavel,&quot;-kgr.rds&quot;))</code></pre>
+# write_rds(nome_variavel,paste0(&quot;../data-raw/nasa-power-&quot;,variavel,&quot;-kgr.rds&quot;))</code></pre>
 <pre class="r"><code># Rodar somente quando necessário!!!!
 nasa_power_kgr &lt;- read_rds(paste0(&quot;../data-raw/nasa-power-&quot;,variavel,&quot;-kgr.rds&quot;))</code></pre>
 <pre class="r"><code>nasa_power_bind &lt;- nasa_power |&gt; 

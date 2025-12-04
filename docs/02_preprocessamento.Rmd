@@ -456,11 +456,11 @@ vari_exp <- gstat::variogram(form, data = df_aux,
                       cressie = FALSE, #estimador clássico do semivar.
                       cutoff = 1, # distância máxima = 8
                       width = 0.075) # distancia entre pontos
-vari_exp  |>
-  ggplot(aes(x=dist, y=gamma)) +
-  geom_point() +
-  labs(x="lag (º)",
-       y=expression(paste(gamma,"(h)")))
+# vari_exp  |>
+#   ggplot(aes(x=dist, y=gamma)) +
+#   geom_point() +
+#   labs(x="lag (º)",
+#        y=expression(paste(gamma,"(h)")))
 ```
 
 
@@ -1885,7 +1885,7 @@ nome_variavel <- map_df(2015:2023,~{
         mutate(year = .x)
   return(df_final)
 })
-write_rds(nome_variavel,paste0("../data-raw/nasa-power-",variavel,"-kgr.rds"))
+# write_rds(nome_variavel,paste0("../data-raw/nasa-power-",variavel,"-kgr.rds"))
 ```
 
 ```{r, eval=FALSE}

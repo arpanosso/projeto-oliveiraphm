@@ -652,6 +652,8 @@ for( i in 2015:2023){
 
 ### 🔎 Análise de correlação - total
 
+Correlação de Pearson
+
 ``` r
 mc <- cor(base_completa_set |>
                 select(anomalia_xco2:queimada, -xch4, -evi,-ndvi), use = "pairwise.complete.obs") # "complete.obs" descarta totalemnte linha com qualquer NA
@@ -666,6 +668,8 @@ corrplot(mc,method = "color",
          cl.length = 5,
          number.cex = 0.8
 ) 
+
+# "method" da função "cor()" não foi especificado, logo o R usa por padrão a correlação de Pearson. Para utilizar a de postos de Spearman: "method = "spearman", ou ainda a de Kendall: "method = "kendall"".
 ```
 
 ### 🔎 Análise de correlação - ANO

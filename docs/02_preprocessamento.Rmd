@@ -54,7 +54,7 @@ Essa é a nova base do Climate TRACE, que compreenderá o período de 2021 a 202
 base_ct_att <- readxl::read_excel("../data-raw/climate-trace-br.xlsx")
 ```
 
-
+<!-- 
 ### Adicionando base climate TRACE atualizada (climate-trace-br.xlsx) na base antiga (emissions_sources.rds)
 
 A base CT nova contém dados para o período de 2021 a 2025, enquanto a base antiga, para o perído de 2015 a 2023. Os dados desta (antiga) foram utilizados até o ano de 2020.
@@ -282,9 +282,9 @@ emissions_sources_15_20_subsetores <- emissions_sources |>
 ### Incorporando bases Climate TRACE setores
 
 ```{r,eval=FALSE}
-climate_trace_setores <- emissions_sources_15_20_setores |> 
-  full_join(emissions_sources_21_25_setores,
-            by = c("year", "state", "city_ref", "residuos", "agricultura", "florestas_e_uso_da_terra", "manufatura", "transporte", "extracao_mineral", "energia", "operacoes_de_combustiveis_fosseis"))
+# climate_trace_setores <- emissions_sources_15_20_setores |> 
+#   full_join(emissions_sources_21_25_setores,
+#             by = c("year", "state", "city_ref", "residuos", "agricultura", "florestas_e_uso_da_terra", "manufatura", "transporte", "extracao_mineral", "energia", "operacoes_de_combustiveis_fosseis"))
 
 # write_rds(climate_trace_setores, '../data/climate_trace_setores.rds')
 ```
@@ -293,39 +293,39 @@ climate_trace_setores <- emissions_sources_15_20_setores |>
 ### Incorporando bases Climate TRACE subsetores
 
 ```{r}
-climate_trace_subsetores <- emissions_sources_15_20_subsetores |> 
-  full_join(emissions_sources_21_25_subsetores,
-            by = c("year", "state", "city_ref", "aplicacao_de_fertilizantes_sinteticos",
-      "aviacao_domestica",
-      "aviacao_internacional",
-      "cultivo_de_arroz",
-      "esterco_deixado_no_pasto_gado",
-      "fermentacao_enterica_gado_a_pasto",
-      "fermentacao_enterica_gado_confinado",
-      "queimadas_em_areas_agricolas",
-      "remocoes_de_carbono_sequestro",
-      "transporte_rodoviario",
-      "tratamento_e_descarte_de_esgoto_domestico",
-      "uso_liquido_de_terras_florestais",
-      "uso_liquido_de_areas_arbustivas_e_gramineas",
-      "uso_liquido_de_areas_umidas",
-      "geracao_de_eletricidade",
-      "disposicao_de_residuos_solidos",
-      "mineracao_de_cobre",
-      "producao_de_cimento",
-      "producao_de_petroleo_e_gas",
-      "reservatorios_de_agua",
-      "navegacao_domestica",
-      "navegacao_internacional",
-      "industria_de_papel_e_celulose",
-      "industria_siderurgica",
-      "mineracao_de_ferro",
-      "mineracao_de_bauxita",
-      "industria_quimica",
-      "mineracao_de_carvao",
-      "producao_de_aluminio",
-      "transporte_de_petroleo_e_gas",
-      "manejo_de_esterco_gado_confinado"))
+# climate_trace_subsetores <- emissions_sources_15_20_subsetores |> 
+#   full_join(emissions_sources_21_25_subsetores,
+#             by = c("year", "state", "city_ref", "aplicacao_de_fertilizantes_sinteticos",
+#       "aviacao_domestica",
+#       "aviacao_internacional",
+#       "cultivo_de_arroz",
+#       "esterco_deixado_no_pasto_gado",
+#       "fermentacao_enterica_gado_a_pasto",
+#       "fermentacao_enterica_gado_confinado",
+#       "queimadas_em_areas_agricolas",
+#       "remocoes_de_carbono_sequestro",
+#       "transporte_rodoviario",
+#       "tratamento_e_descarte_de_esgoto_domestico",
+#       "uso_liquido_de_terras_florestais",
+#       "uso_liquido_de_areas_arbustivas_e_gramineas",
+#       "uso_liquido_de_areas_umidas",
+#       "geracao_de_eletricidade",
+#       "disposicao_de_residuos_solidos",
+#       "mineracao_de_cobre",
+#       "producao_de_cimento",
+#       "producao_de_petroleo_e_gas",
+#       "reservatorios_de_agua",
+#       "navegacao_domestica",
+#       "navegacao_internacional",
+#       "industria_de_papel_e_celulose",
+#       "industria_siderurgica",
+#       "mineracao_de_ferro",
+#       "mineracao_de_bauxita",
+#       "industria_quimica",
+#       "mineracao_de_carvao",
+#       "producao_de_aluminio",
+#       "transporte_de_petroleo_e_gas",
+#       "manejo_de_esterco_gado_confinado"))
       
       # Presentes apenas em 21–23:
       # "residuos_de_culturas_agricolas",
@@ -350,10 +350,7 @@ climate_trace_subsetores <- emissions_sources_15_20_subsetores |>
 ```
 
 
-
-
-
-
+-->
 ### 💨 Entrada com a Base: `nasa-xco2.rds`
 ```{r, eval=FALSE}
 nasa_xco2 <- read_rds("../data/nasa-xco2.rds") |> 
@@ -472,8 +469,89 @@ modelo_1 <- fit.variogram(vari_exp,vgm(patamar,"Sph",alcance,epepita))
 modelo_2 <- fit.variogram(vari_exp,vgm(patamar,"Exp",alcance,epepita))
 modelo_3 <- fit.variogram(vari_exp,vgm(patamar,"Gau",alcance,epepita))
 plot_my_models(modelo_1,modelo_2,modelo_3)
-modelo <- modelo_2 ## sempre modificar
+modelo <- modelo_2 ## sempre MODIFICAR
 ```
+
+#### ✅ Selecionado o melhor modelo, vamos guardá-lo
+
+Este chunk do código tem por objetivo selecionar o melhor modelo dos semivariogramas experimentais para as diferentes variáveis. Assim, pode ser "reutilizado" para qualquer uma das variáveis analisadas, desde que, sejam as variáveis espaciais estimadas pela krigaem ordinária, rode o novo semivariograma desejado e altere: 
+
+*1. O modelo* - ~ Linha 472 (já será alterado ao rodar o novo semivariograma)
+*2. A variável* - ~ Linha 543 e 547
+*3. O nome do arquivo salvo* - ~ Linha 547
+
+`O novo semivariograma a ser rodado deve abranger, por exemplo, desde a linha 784 à 904.`
+
+`As variáveis krigadas foram: XCO2, XCH4, SIF e as do NASA POWER - A base do AppEEARS não foi krigada pois o sensor abrangeu quase que integralmente todos os municípios`
+
+
+```{r}
+# 2) Extração dos parâmetros dos modelos
+sqr.f1 <- round(attr(modelo_1, "SSErr"), 4)
+c01    <- round(modelo_1$psill[[1]], 4)
+c0_c11 <- round(sum(modelo_1$psill), 4)
+a1     <- round(modelo_1$range[[2]], 2)
+
+sqr.f2 <- round(attr(modelo_2, "SSErr"), 4)
+c02    <- round(modelo_2$psill[[1]], 4)
+c0_c12 <- round(sum(modelo_2$psill), 4)
+a2     <- round(3 * modelo_2$range[[2]], 2)
+
+sqr.f3 <- round(attr(modelo_3, "SSErr"), 4)
+c03    <- round(modelo_3$psill[[1]], 4)
+c0_c13 <- round(sum(modelo_3$psill), 4)
+a3     <- round(modelo_3$range[[2]] * sqrt(3), 2)
+
+# 3) Cálculo dos R² para cada modelo
+df_aux <- vari_exp |>
+  mutate(
+    gamma_m1 = ifelse(dist <= a1,
+                      c01 + (c0_c11 - c01) * (1.5*(dist/a1) - 0.5*(dist/a1)^3),
+                      c0_c11),
+
+    gamma_m2 = c02 + (c0_c12 - c02) * (1 - exp(-3 * (dist/a2))),
+
+    gamma_m3 = c03 + (c0_c13 - c03) * (1 - exp(-3 * (dist/a3)^2)),
+
+    residuo_total = (gamma - mean(gamma))^2,
+    residuo_mod_1 = (gamma - gamma_m1)^2,
+    residuo_mod_2 = (gamma - gamma_m2)^2,
+    residuo_mod_3 = (gamma - gamma_m3)^2
+  ) |>
+  summarise(
+    r2_1 = (sum(residuo_total) - sum(residuo_mod_1)) / sum(residuo_total),
+    r2_2 = (sum(residuo_total) - sum(residuo_mod_2)) / sum(residuo_total),
+    r2_3 = (sum(residuo_total) - sum(residuo_mod_3)) / sum(residuo_total)
+  )
+
+r21 <- as.vector(round(df_aux[1], 4))
+r22 <- as.vector(round(df_aux[2], 4))
+r23 <- as.vector(round(df_aux[3], 4))
+
+# Salvando os parâmetros dos melhores modelo
+model <- modelo |> slice(2) |> pull(model)
+rss <- round(attr(modelo, "SSErr"),4) # Extrai SSErr (Sum of Squared Errors) do modelo
+c0 <- round(modelo$psill[[1]],4) # psill[[1]] = o nugget (C0)
+c0_c1 <- round(sum(modelo$psill),4) # Soma patamar + efeito pepita = sill total 
+a <- ifelse(model == "Gau", round(modelo$range[[2]]*(3^.5),2),
+            ifelse(model == "Exp",round(3*modelo$range[[2]],2),
+            round(modelo$range[[2]],2))) # alcance ajustado conforme modelo (alcance efetivo)
+r2 <- ifelse(model == "Gau", r23,
+            ifelse(model == "Exp",r22,
+            r21)) |> pluck(1) # R quadrado
+tibble( #criando tibble com todos os resultados
+  my_states, my_year, model, c0, c0_c1, a, rss, r2
+) |> mutate(gde = c0/c0_c1, .after = "a") |>
+  rename(state=my_states,year=my_year) |> 
+  write_csv(paste0("../output/",paste(my_states,
+                                            collapse = "_"), 
+                   "-",my_year,"-nasa_temp.csv")) # MODIFICAR variável
+
+ls_csv <- list.files("../output/",full.names = TRUE,pattern = "-nasa_temp.csv") # MODIFICAR
+map_df(ls_csv, read_csv) |> 
+  writexl::write_xlsx("../output/semivariogram-models-nasa_temp.xlsx") # MODIFICAR
+```
+
 
 ```{r, eval=FALSE}
 ko_variavel <- krige(formula=form, df_aux, grid_geral, model=modelo,
@@ -731,7 +809,7 @@ Já feito no arquivo da pasta docs
 ```{r, eval=FALSE}
 gosat_xch4 <- read_rds("../data/gosat_xch4.rds") # os arquivos com underline foram tratados, classificados por município e deverão ser repassados para a pasta data futuramente
 
-my_year = 2021
+my_year = 2020
 municipality |> 
   filter(abbrev_state %in% my_states) |> 
   left_join(
@@ -1072,7 +1150,7 @@ oco2_sif |>
 
 #### Gerar mapa
 ```{r, eval=FALSE}
-my_year = 2022
+my_year = 2020
 municipality |> 
   filter(abbrev_state %in% my_states) |> 
   left_join(
@@ -1421,7 +1499,7 @@ appeears_modis |>
 
 #### Gerar mapas das variáveis - appeears
 ```{r, eval=FALSE}
-# my_year = 2021
+# my_year = 2020
 
 # Definir a variável
 variavel <- "media_lai" # <-- mudar
@@ -1549,7 +1627,7 @@ Já feito no script de faxina "nasa-power.Rmd"
 
 #### Gerar mapa
 ```{r, eval=FALSE}
-my_year <- 2022
+my_year <- 2020
 
 # Atribuir ao objeto "variavel" a variável climática da base do nasa power que iremos trabalhar
   # Radiacao 
@@ -1560,7 +1638,7 @@ my_year <- 2022
   # Pressao
 
 # Definir variável
-variavel <- "Pressao" #mudar
+variavel <- "Temperatura" #mudar
 
 # Estabelecer anos
 anos <- 2015:2023
@@ -2190,7 +2268,7 @@ munic_geobr |>
 
 Essa é a outra base do deter, que contém somente os focos de queimadas por estados
 
-Análise pouca representativa (somente comentar no relatório)
+Análise pouca representativa (opcionalmente comentar no relatório)
 
 ```{r, eval=FALSE}
 focos_queimadas <- read_rds(("../data/focos_queimadas.rds")

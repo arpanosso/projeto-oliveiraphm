@@ -712,7 +712,7 @@ pol_df &lt;- states |&gt; filter(abbrev_state == &quot;DF&quot;) |&gt;
 </div>
 <div id="gerar-mapa" class="section level4">
 <h4>Gerar mapa</h4>
-<pre class="r"><code>my_year = 2020
+<pre class="r"><code>my_year = 2021
 municipality |&gt; 
   filter(abbrev_state %in% my_states) |&gt; 
   left_join(
@@ -872,11 +872,11 @@ tibble( #criando tibble com todos os resultados
   rename(state=my_states,year=my_year) |&gt; 
   write_csv(paste0(&quot;../output/&quot;,paste(my_states,
                                             collapse = &quot;_&quot;), 
-                   &quot;-&quot;,my_year,&quot;-nasa_temp.csv&quot;)) # MODIFICAR variável
+                   &quot;-&quot;,my_year,&quot;-xco2.csv&quot;)) # MODIFICAR variável
 
-ls_csv &lt;- list.files(&quot;../output/&quot;,full.names = TRUE,pattern = &quot;-nasa_temp.csv&quot;) # MODIFICAR
+ls_csv &lt;- list.files(&quot;../output/&quot;,full.names = TRUE,pattern = &quot;-xco2.csv&quot;) # MODIFICAR
 map_df(ls_csv, read_csv) |&gt; 
-  writexl::write_xlsx(&quot;../output/semivariogram-models-nasa_temp.xlsx&quot;) # MODIFICAR</code></pre>
+  writexl::write_xlsx(&quot;../output/semivariogram-models-xco2.xlsx&quot;) # MODIFICAR</code></pre>
 <pre class="r"><code>ko_variavel &lt;- krige(formula=form, df_aux, grid_geral, model=modelo,
                      block=c(0.1,0.1),
                      nsim=0,

@@ -375,7 +375,7 @@ pol_df <- states |> filter(abbrev_state == "DF") |>
 
 #### Gerar mapa
 ```{r, eval=FALSE}
-my_year = 2020
+my_year = 2021
 municipality |> 
   filter(abbrev_state %in% my_states) |> 
   left_join(
@@ -545,11 +545,11 @@ tibble( #criando tibble com todos os resultados
   rename(state=my_states,year=my_year) |> 
   write_csv(paste0("../output/",paste(my_states,
                                             collapse = "_"), 
-                   "-",my_year,"-nasa_temp.csv")) # MODIFICAR variável
+                   "-",my_year,"-xco2.csv")) # MODIFICAR variável
 
-ls_csv <- list.files("../output/",full.names = TRUE,pattern = "-nasa_temp.csv") # MODIFICAR
+ls_csv <- list.files("../output/",full.names = TRUE,pattern = "-xco2.csv") # MODIFICAR
 map_df(ls_csv, read_csv) |> 
-  writexl::write_xlsx("../output/semivariogram-models-nasa_temp.xlsx") # MODIFICAR
+  writexl::write_xlsx("../output/semivariogram-models-xco2.xlsx") # MODIFICAR
 ```
 
 

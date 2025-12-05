@@ -486,7 +486,7 @@ Este chunk do código tem por objetivo selecionar o melhor modelo dos semivariog
 
 
 ```{r}
-# 2) Extração dos parâmetros dos modelos
+# Extraindo dos parâmetros dos modelos
 sqr.f1 <- round(attr(modelo_1, "SSErr"), 4)
 c01    <- round(modelo_1$psill[[1]], 4)
 c0_c11 <- round(sum(modelo_1$psill), 4)
@@ -502,7 +502,7 @@ c03    <- round(modelo_3$psill[[1]], 4)
 c0_c13 <- round(sum(modelo_3$psill), 4)
 a3     <- round(modelo_3$range[[2]] * sqrt(3), 2)
 
-# 3) Cálculo dos R² para cada modelo
+# Cálculo dos R² para cada modelo
 df_aux <- vari_exp |>
   mutate(
     gamma_m1 = ifelse(dist <= a1,

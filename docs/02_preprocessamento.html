@@ -813,7 +813,7 @@ semivariograma) <em>2. A variável</em> - ~ Linha 543 e 547 <em>3. O nome
 do arquivo salvo</em> - ~ Linha 547</p>
 <p><code>O novo semivariograma a ser rodado deve abranger, por exemplo, desde a linha 784 à 904.</code></p>
 <p><code>As variáveis krigadas foram: XCO2, XCH4, SIF e as do NASA POWER - A base do AppEEARS não foi krigada pois o sensor abrangeu quase que integralmente todos os municípios</code></p>
-<pre class="r"><code># 2) Extração dos parâmetros dos modelos
+<pre class="r"><code># Extraindo dos parâmetros dos modelos
 sqr.f1 &lt;- round(attr(modelo_1, &quot;SSErr&quot;), 4)
 c01    &lt;- round(modelo_1$psill[[1]], 4)
 c0_c11 &lt;- round(sum(modelo_1$psill), 4)
@@ -829,7 +829,7 @@ c03    &lt;- round(modelo_3$psill[[1]], 4)
 c0_c13 &lt;- round(sum(modelo_3$psill), 4)
 a3     &lt;- round(modelo_3$range[[2]] * sqrt(3), 2)
 
-# 3) Cálculo dos R² para cada modelo
+# Cálculo dos R² para cada modelo
 df_aux &lt;- vari_exp |&gt;
   mutate(
     gamma_m1 = ifelse(dist &lt;= a1,

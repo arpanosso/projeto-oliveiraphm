@@ -656,17 +656,24 @@ Correlação de Pearson
 
 ``` r
 mc <- cor(base_completa_set |>
-                select(anomalia_xco2:queimada, -xch4, -evi,-ndvi), use = "pairwise.complete.obs") # "complete.obs" descarta totalemnte linha com qualquer NA
+            select(anomalia_xco2:queimada, -xch4, -evi, -ndvi)  |> 
+            rename_with(~ str_to_title(.x))|>
+            rename(
+              XCO2 = Anomalia_xco2, XCH4 = Anomalia_xch4, "SIF 757" = Sif_757,
+              LAI = Lai, FPAR = Fpar, Precipitação = Precipitacao, 
+              Radiação = Radiacao, Pressão = Pressao
+            ), use = "complete.obs") # "complete.obs" descarta totalemnte linha com qualquer NA
 corrplot(mc,method = "color",
          outline = TRUE,
-         type = "upper",
+         # type = "upper",
          addgrid.col = "darkgray",cl.pos = "r", tl.col = "black",
-         tl.cex = .8, cl.cex = 1,  bg="azure2",
+         tl.cex = .85, cl.cex = 1,  bg="azure2",
          # diag = FALSE,
          # addCoef.col = "black",
-         cl.ratio = 0.2,
-         cl.length = 5,
-         number.cex = 0.8
+         cl.ratio = 0.15,
+         cl.length = 5
+         # number.cex = 0.5, #tamanho dos n° dentro da matriz
+         # addCoef.col = "black"
 ) 
 
 # "method" da função "cor()" não foi especificado, logo o R usa por padrão a correlação de Pearson. Para utilizar a de postos de Spearman: "method = "spearman", ou ainda a de Kendall: "method = "kendall"".
@@ -680,7 +687,7 @@ for( i in 2015:2023){
   # Análise de correlação
   base_aux <- base_completa_set |>
     filter(year == i) |> 
-    select(xco2:desmatamento, -evi, -ndvi,-xco2,-xch4, -temperatura,-sif_757) 
+    select(xco2:queimada, -evi, -ndvi,-xco2,-xch4, -temperatura,-sif_757) 
   
   municipios <-base_completa_set |>
     filter(year == i) |> 
@@ -703,8 +710,8 @@ for( i in 2015:2023){
   
   # Análise de agrupamento
   da_pad <- decostand(base_aux[,fc] |> 
-                        mutate(across(everything(), ~replace_na(., 0))),  # invés de passar NA = 0, não podemos passar a mediana do estado?
-                      method = "standardize",
+                        mutate(across(everything(), ~replace_na(., 0))),  # padronização para média 0 e variância 1 (tornar os pesos das análises iguais)
+                      method = "standardize", # subtrai a média da variável e divide pelo desvio-padrão da variável
                       na.rm=TRUE)
   da_pad_euc <- vegdist(da_pad,"euclidean") 
   da_pad_euc_ward<-hclust(da_pad_euc, method="ward.D")
@@ -718,7 +725,7 @@ for( i in 2015:2023){
        col="blue", las=1,
        cex=.6,lwd=1.5);box();abline(h=d_corte*1.15)
   
-  # Mapaeamento dos Grupos
+  # Mapeamento dos Grupos
   plot_map_group <- municipality |> 
     mutate(
       name_muni = stri_trans_general(tolower(name_muni), "Latin-ASCII"),
@@ -1734,7 +1741,7 @@ map(2015:2024,~{municipality |>
       legend.text = element_text(size = rel(1), color = "black"),
       legend.title = element_text(face = 'bold', size = rel(1.2))
     ) +
-    labs(fill = 'Agrupamento',
+    labs(fill = 'Remoção de C',
          x = 'Longitude',
          y = 'Latitude') +
     scale_fill_viridis_c()})

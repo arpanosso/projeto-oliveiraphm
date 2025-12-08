@@ -431,7 +431,7 @@ br |>
     -   Extrai ano/mês/dia do timestamp
 
 2.  **Cálculo de SIF**\
-    Combina medidas de fluorescência em 757nm e 771nm numa métrica única
+    *Combina medidas de fluorescência em 757nm e 771nm numa métrica única
 
 3.  **Filtro Geográfico**
 

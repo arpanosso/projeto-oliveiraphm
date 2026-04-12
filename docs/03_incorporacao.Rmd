@@ -153,6 +153,8 @@ Para resolver, deve-se agregar a krigagem à geometria municipal para que todos 
 
 ### Função para atribuir a mediana em um município, a partir da observação média da mediana de municípios vizinhos 
 
+Etapa realizada com auxílio de IA
+
 ```{r, eval=FALSE}
 # Função para imputar NAs pela mediana dos até n vizinhos mais próximos
 impute_NAs_vizinhos <- function( 

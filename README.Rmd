@@ -171,7 +171,7 @@ base_completa_set <- base_completa_setores |>
 base_completa_subsetores <- read_rds('data/base_completa_subsetores.rds')
 ```
 
-### Tratando outliers dos subsetores... (ainda não refeito para anos pares e ímpares)
+### Tratando outliers dos subsetores...
 
 Mesma lógica que à utilizada para os setores
 ```{r}
@@ -220,9 +220,8 @@ base_completa_subset_novas_medias <- base_completa_subsetores |>
 
 # 🔎 Análises
 
-
 <!--
-### 🧮 Estatística descritiva
+### 🧮 Estatística descritiva (gerada uma vez)
 
 ```{r,eval=FALSE}
 variavel <- "xch4" # opcional (mudar variavel)
@@ -261,7 +260,7 @@ writexl::write_xlsx(df, paste0("output/estat-descritiva-",variavel,"_.xlsx"))
 
 ```
 
-### 📊 Histogramas
+### 📊 Histogramas (pouco representativos para o objetivo de análise)
 
 ```{r,eval=FALSE}
 variavel <- "xco2" # mudar
@@ -294,7 +293,6 @@ base_completa |>
 ```
 -->
 
-
 ## Análise de tendência dos dados de XCO2 e XCH4
  
  Caraterizando a tendência para resolução temporal em anos.
@@ -317,7 +315,7 @@ base_completa_set |>
 base_completa_set |> 
   mutate(
     state = ifelse(state=="DF","GO",state),0) |> 
-  # sample_n(10000) |> 
+  # sample_n(10000) |> # teste
   ggplot(aes(x=year, y=xch4)) +
   geom_point() +
   geom_point(shape=21,color="black",fill="gray") +
@@ -423,6 +421,7 @@ base_completa_set <- base_completa_set_tend |>
 A base de dados do GOSAT disponibiliza informações de XCH₄ até o ano de 2021. Para possibilitar as análises, realizou-se a predição dos valores para 2022 e 2023 por meio do método de regressão linear simples, utilizando os dados observados no período de 2015 a 2021 como base de treinamento.
 
 ```{r}
+# Atualizando valores ausentes de xch4 
 city_ref <- base_completa_set$city_ref |> unique()
 
 for(i in seq_along(city_ref)){
@@ -441,6 +440,7 @@ for(i in seq_along(city_ref)){
                            a+year*b,xch4),xch4)
     )}
 }
+
 base_completa_set <- base_completa_set |> 
   group_by(year, state) |> 
   mutate(
@@ -452,15 +452,6 @@ base_completa_set <- base_completa_set |>
 
 base_completa_set$xch4 |> is.na() |>  sum()
 ```
-
-
-
-
-
-
-
-
-
 
 ### 🔎 Mapas de XCO2 e XCH4 + respectivas anomalias
 
@@ -802,7 +793,7 @@ corr_maps <- plot_map_group + bi_plot + plot_layout(ncol = 2) +
 
 }
 ```
-<!--
+
 ## 🗺️ Mapa de EMISSÃO TOTAL - setores
 
 ```{r}
@@ -881,7 +872,6 @@ map(2015:2023,~{municipality |>
     scale_fill_viridis_c()})
 ```
 
--->
 
 #### 🗺️ Mapa de EMISSÃO TOTAL - setores - Criando classe de emissão
 

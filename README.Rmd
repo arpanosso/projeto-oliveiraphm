@@ -339,14 +339,12 @@ mod_trend_xco2 <- lm(
   xco2 ~ year_adj + city_ref,
   data = base_completa_set_tend |> drop_na(xco2, city_ref)
 )
-mod_trend_xco2
 
 # Modelo XCH4
 mod_trend_xch4 <- lm(
   xch4 ~ year_adj + city_ref,
   data = base_completa_set_tend |> drop_na(xch4, city_ref)
 )
-mod_trend_xch4
 
 # 2) Previsão da tendência usando os modelos
 
@@ -789,6 +787,8 @@ corr_maps <- plot_map_group + bi_plot + plot_layout(ncol = 2) +
 
 }
 ```
+
+
 <!--
 ## 🗺️ Mapa de EMISSÃO TOTAL - setores
 

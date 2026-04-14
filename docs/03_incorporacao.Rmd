@@ -93,6 +93,11 @@ data_set_kgr_bind2 <- data_set_kgr_bind |>
   pivot_wider(names_from = variable, values_from = value_mean) # reduz linhas
 ```
 
+################################################################################
+########## ESSA PARTE DO CÓDIGO (ABAIXO) FOI DESCARTADA,  ######################
+##########  MANTENDO-SE APENAS PARA FINS DIDÁTICOS          ####################
+################################################################################
+
 ### Criar os mapas por variáveis por ano para verifcar os municípios não plotados 
 
 Vamos verificar onde estão os NA
@@ -147,6 +152,8 @@ Para resolver, deve-se agregar a krigagem à geometria municipal para que todos 
     Sendo assim, basta fazer o bind e salvar os arquivos de cada variável (FEITO)
 
 ### Função para atribuir a mediana em um município, a partir da observação média da mediana de municípios vizinhos 
+
+Etapa realizada com auxílio de IA
 
 ```{r, eval=FALSE}
 # Função para imputar NAs pela mediana dos até n vizinhos mais próximos
@@ -381,6 +388,11 @@ df_kgr_preenchido
 # df_kgr_preenchido |> 
 #   filter(state == 'MS')
 ```
+
+################################################################################
+########## ESSA PARTE DO CÓDIGO (ACIMA) FOI DESCARTADA,  #######################
+##########  MANTENDO-SE APENAS PARA FINS DIDÁTICOS          ####################
+################################################################################
 -->
 
 ## 💨 Entrada com a base parcial `parcial_base.rds`

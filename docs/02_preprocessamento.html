@@ -388,90 +388,93 @@ source(&quot;../R/my-function.R&quot;)</code></pre>
 <p>Essa é a nova base do Climate TRACE, que compreenderá o período de
 2021 a 2023</p>
 <pre class="r"><code>base_ct_att &lt;- readxl::read_excel(&quot;../data-raw/climate-trace-br.xlsx&quot;)</code></pre>
-</div>
-<div id="adicionando-base-climate-trace-atualizada-climate-trace-br.xlsx-na-base-antiga-emissions_sources.rds" class="section level3">
-<h3>Adicionando base climate TRACE atualizada (climate-trace-br.xlsx) na
-base antiga (emissions_sources.rds)</h3>
-<p>A base CT nova contém dados para o período de 2021 a 2025, enquanto a
-base antiga, para o perído de 2015 a 2023. Os dados desta (antiga) foram
-utilizados até o ano de 2020.</p>
-<div id="finalizar-tratamento-da-base-nova-para-posterior-incorporação" class="section level4">
-<h4>Finalizar tratamento da base nova para posterior incorporação</h4>
-<div id="pegando-setores-da-base-nova" class="section level5">
-<h5>Pegando setores da base nova</h5>
-<pre class="r"><code># Criando vetor para extrair os municipios de todos os tipos de emissões, possibilitando a padronização dos nomes para posterior incorporação
-# base_ct_att |&gt; pull(admin) |&gt; unique()
+<!-- 
+### Adicionando base climate TRACE atualizada (climate-trace-br.xlsx) na base antiga (emissions_sources.rds)
 
-municipios &lt;- municipality |&gt; 
-  filter(abbrev_state %in% my_states) |&gt; 
+A base CT nova contém dados para o período de 2021 a 2025, enquanto a base antiga, para o perído de 2015 a 2023. Os dados desta (antiga) foram utilizados até o ano de 2020.
+
+#### Finalizar tratamento da base nova para posterior incorporação
+
+##### Pegando setores da base nova
+
+
+``` r
+# Criando vetor para extrair os municipios de todos os tipos de emissões, possibilitando a padronização dos nomes para posterior incorporação
+# base_ct_att |> pull(admin) |> unique()
+
+municipios <- municipality |> 
+  filter(abbrev_state %in% my_states) |> 
   mutate(
-    name_muni  = stri_trans_general(tolower(name_muni ), &quot;Latin-ASCII&quot;),
-    name_muni  = trimws(name_muni )) |&gt; 
-  pull(name_muni) |&gt; unique()
+    name_muni  = stri_trans_general(tolower(name_muni ), "Latin-ASCII"),
+    name_muni  = trimws(name_muni )) |> 
+  pull(name_muni) |> unique()
 
-padrao_municipios &lt;- paste0(municipios, collapse = &quot;|&quot;)
+padrao_municipios <- paste0(municipios, collapse = "|")
 
 # Tratando base --------------------------------------------------
-emissions_sources_21_25_setores &lt;- base_ct_att |&gt; 
+emissions_sources_21_25_setores <- base_ct_att |> 
   rename(city_ref = fonte,
          emissao = emissao_co2e,
          state = estado,
-         year = ano) |&gt;
-  select(year, state, city_ref, emissao, setor) |&gt; 
+         year = ano) |>
+  select(year, state, city_ref, emissao, setor) |> 
   mutate(
-    city_ref = stri_trans_general(tolower(city_ref), &quot;Latin-ASCII&quot;),
+    city_ref = stri_trans_general(tolower(city_ref), "Latin-ASCII"),
     city_ref = trimws(city_ref),
     city_ref = str_extract(city_ref, padrao_municipios)
-  ) |&gt;
-  group_by(year, state, city_ref, setor) |&gt;
-  summarise(emissao_setores = sum(emissao)) |&gt; 
+  ) |>
+  group_by(year, state, city_ref, setor) |>
+  summarise(emissao_setores = sum(emissao)) |> 
   pivot_wider(
     names_from = setor,
     values_from = emissao_setores,
-    names_prefix = &quot;emissao_&quot;
-  ) |&gt;
+    names_prefix = "emissao_"
+  ) |>
   rename_with(
-    .cols = starts_with(&quot;emissao&quot;),
+    .cols = starts_with("emissao"),
     .fn = function(x) {
-      x &lt;- tolower(x)
-      x &lt;- stri_trans_general(x, &quot;Latin-ASCII&quot;)
-      x &lt;- gsub(&#39;emissao_&#39;, &quot;&quot;, x) # encurtar nomes
-      x &lt;- gsub(&quot; &quot;, &quot;_&quot;, x) #espaço -&gt; _
-      x &lt;- gsub(&quot;-&quot;, &quot;_&quot;, x) # - -&gt; _
+      x <- tolower(x)
+      x <- stri_trans_general(x, "Latin-ASCII")
+      x <- gsub('emissao_', "", x) # encurtar nomes
+      x <- gsub(" ", "_", x) #espaço -> _
+      x <- gsub("-", "_", x) # - -> _
       x
-    }) |&gt; 
+    }) |> 
   filter(state %in% my_states,
-         year %in% 2021:2025)</code></pre>
-</div>
-<div id="pegando-subsetores-da-base-nova" class="section level5">
-<h5>Pegando subsetores da base nova</h5>
-<pre class="r"><code>emissions_sources_21_25_subsetores &lt;- base_ct_att |&gt; 
+         year %in% 2021:2025)
+```
+
+##### Pegando subsetores da base nova
+
+
+``` r
+emissions_sources_21_25_subsetores <- base_ct_att |> 
   rename(city_ref = fonte,
          emissao = emissao_co2e,
          state = estado,
-         year = ano) |&gt;
-  select(year, state, city_ref, emissao, subsetor) |&gt; 
+         year = ano) |>
+  select(year, state, city_ref, emissao, subsetor) |> 
   mutate(
-    city_ref = stri_trans_general(tolower(city_ref), &quot;Latin-ASCII&quot;),
+    city_ref = stri_trans_general(tolower(city_ref), "Latin-ASCII"),
     city_ref = trimws(city_ref),
     city_ref = str_extract(city_ref, padrao_municipios)
-  ) |&gt;
-  group_by(year, state, city_ref, subsetor) |&gt;
-  summarise(emissao_sub_setores = sum(emissao)) |&gt; 
+  ) |>
+  group_by(year, state, city_ref, subsetor) |>
+  summarise(emissao_sub_setores = sum(emissao)) |> 
   pivot_wider(
     names_from = subsetor,
     values_from = emissao_sub_setores,
-    names_prefix = &quot;emissao_&quot;) |&gt;
+    names_prefix = "emissao_") |>
   rename_with(
-    .cols = starts_with(&quot;emissao&quot;),
+    .cols = starts_with("emissao"),
     .fn = function(x) {
-      x &lt;- tolower(x)
-      x &lt;- stri_trans_general(x, &quot;Latin-ASCII&quot;)
-      x &lt;- gsub(&#39;emissao_&#39;, &quot;&quot;, x) # encurtar nomes
-      x &lt;- gsub(&quot; &quot;, &quot;_&quot;, x) #espaço -&gt; _
-      x &lt;- gsub(&quot;-&quot;, &quot;_&quot;, x) # - -&gt; _
+      x <- tolower(x)
+      x <- stri_trans_general(x, "Latin-ASCII")
+      x <- gsub('emissao_', "", x) # encurtar nomes
+      x <- gsub(" ", "_", x) #espaço -> _
+      x <- gsub("-", "_", x) # - -> _
       x
-    }) |&gt; 
+    }) |> 
   rename(
     fermentacao_enterica_gado_a_pasto = fermentacao_enterica___gado_a_pasto,
     esterco_deixado_no_pasto_gado = `esterco_deixado_no_pasto_(gado)`,
@@ -481,39 +484,41 @@ emissions_sources_21_25_setores &lt;- base_ct_att |&gt;
     fermentacao_enterica_gado_confinado = fermentacao_enterica___gado_confinado,
     manejo_de_esterco_gado_confinado = manejo_de_esterco___gado_confinado,
     industria_quimica = industria_quimica
-  ) |&gt; 
+  ) |> 
   filter(state %in% my_states,
-         year %in% 2021:2025)</code></pre>
-</div>
-</div>
-<div id="finalizar-tratamento-da-base-antiga-para-posterior-incorporação" class="section level4">
-<h4>Finalizar tratamento da base antiga para posterior incorporação</h4>
-<div id="pegando-setores-da-base-antiga-emissions_sources.rds" class="section level5">
-<h5>Pegando setores da base antiga
-<code>emissions_sources.rds</code></h5>
-<pre class="r"><code># Visualizando setores da base antiga
-emissions_sources |&gt; pull(sector_name) |&gt; unique() 
+         year %in% 2021:2025)
+```
+
+
+#### Finalizar tratamento da base antiga para posterior incorporação
+
+##### Pegando setores da base antiga `emissions_sources.rds`
+
+
+``` r
+# Visualizando setores da base antiga
+emissions_sources |> pull(sector_name) |> unique() 
   
 # Extraindo setores da base antiga
   # Antes, visualizar setores da nova base para padronizarmos:
-      base_ct_att |&gt; pull(setor) |&gt; unique()
+      base_ct_att |> pull(setor) |> unique()
 
-emissions_sources_15_20_setores &lt;- emissions_sources |&gt; 
+emissions_sources_15_20_setores <- emissions_sources |> 
   filter(#  filtro de ano e estados passado para o final, para evitar ausência de observação para alguns dos subsetores
-         gas == &quot;co2e_100yr&quot;)  |&gt; 
+         gas == "co2e_100yr")  |> 
   rename(state = sigla_uf,
          emissao = emissions_quantity,
-         setor = sector_name) |&gt; 
-  select(year, city_ref, state, emissao, setor) |&gt;
+         setor = sector_name) |> 
+  select(year, city_ref, state, emissao, setor) |>
   mutate(
-    city_ref = stri_trans_general(tolower(city_ref), &quot;Latin-ASCII&quot;),
+    city_ref = stri_trans_general(tolower(city_ref), "Latin-ASCII"),
     city_ref = trimws(city_ref)
-  ) |&gt; 
-  group_by(year, state, city_ref, setor) |&gt;
-  summarise(emissao_setores = sum(emissao)) |&gt; 
+  ) |> 
+  group_by(year, state, city_ref, setor) |>
+  summarise(emissao_setores = sum(emissao)) |> 
   pivot_wider(
     names_from = setor,
-    values_from = emissao_setores) |&gt;
+    values_from = emissao_setores) |>
   rename(
     agricultura = agriculture,
     florestas_e_uso_da_terra = forestry_and_land_use,
@@ -524,46 +529,49 @@ emissions_sources_15_20_setores &lt;- emissions_sources |&gt;
     transporte = transportation,
     # Edificações (não tem)
     energia = power
-  ) |&gt; 
+  ) |> 
   filter(state %in% my_states,
-         year %in% 2015:2020) # só até 2020, pois a nova contém a partir de 2021)</code></pre>
-</div>
-<div id="pegando-subsetores-da-base-antiga" class="section level5">
-<h5>Pegando subsetores da base antiga</h5>
-<pre class="r"><code># Visualizando subsetores da base antiga
-emissions_sources |&gt; pull(sub_sector) |&gt; unique()
+         year %in% 2015:2020) # só até 2020, pois a nova contém a partir de 2021)
+```
+
+##### Pegando subsetores da base antiga
+
+
+``` r
+# Visualizando subsetores da base antiga
+emissions_sources |> pull(sub_sector) |> unique()
 
 # Extraindo subsetores da base antiga
   # Antes, visualizar subsetores da nova base para padronizarmos:
-    base_ct_att |&gt; pull(subsetor) |&gt; unique()
+    base_ct_att |> pull(subsetor) |> unique()
     
-emissions_sources_15_20_subsetores &lt;- emissions_sources |&gt; 
+emissions_sources_15_20_subsetores <- emissions_sources |> 
   filter(#  filtro de ano e estados passado para o final, para evitar ausência de observação para alguns dos subsetores
-         gas == &quot;co2e_100yr&quot;) |&gt; 
+         gas == "co2e_100yr") |> 
   rename(state = sigla_uf,
          emissao = emissions_quantity,
-         subsetor = sub_sector) |&gt; 
-  select(year, city_ref, state, emissao, subsetor) |&gt;
+         subsetor = sub_sector) |> 
+  select(year, city_ref, state, emissao, subsetor) |>
   mutate(
-    city_ref = stri_trans_general(tolower(city_ref), &quot;Latin-ASCII&quot;),
+    city_ref = stri_trans_general(tolower(city_ref), "Latin-ASCII"),
     city_ref = trimws(city_ref)
-  ) |&gt; 
-  group_by(year, state, city_ref, subsetor) |&gt;
-  summarise(emissao_subsetores = sum(emissao)) |&gt; 
+  ) |> 
+  group_by(year, state, city_ref, subsetor) |>
+  summarise(emissao_subsetores = sum(emissao)) |> 
   pivot_wider(
     names_from = subsetor,
     values_from = emissao_subsetores,
-    names_prefix = &quot;emissao_&quot;) |&gt;
+    names_prefix = "emissao_") |>
   rename_with(
-    .cols = starts_with(&quot;emissao&quot;),
+    .cols = starts_with("emissao"),
     .fn = function(x) {
-      x &lt;- tolower(x)
-      x &lt;- stri_trans_general(x, &quot;Latin-ASCII&quot;)
-      x &lt;- gsub(&#39;emissao_&#39;, &quot;&quot;, x) # encurtar nomes
-      x &lt;- gsub(&quot; &quot;, &quot;_&quot;, x) #espaço -&gt; _
-      x &lt;- gsub(&quot;-&quot;, &quot;_&quot;, x) # - -&gt; _
+      x <- tolower(x)
+      x <- stri_trans_general(x, "Latin-ASCII")
+      x <- gsub('emissao_', "", x) # encurtar nomes
+      x <- gsub(" ", "_", x) #espaço -> _
+      x <- gsub("-", "_", x) # - -> _
       x
-    }) |&gt;
+    }) |>
   rename(
   aplicacao_de_fertilizantes_sinteticos = synthetic_fertilizer_application,
   cultivo_de_arroz = rice_cultivation,
@@ -604,76 +612,85 @@ emissions_sources_15_20_subsetores &lt;- emissions_sources |&gt;
   queimadas_em_areas_arbustivas = shrubgrass_fires,
   queimadas_em_areas_umidas = wetland_fires,
   producao_de_aluminio = aluminum
-) |&gt; 
+) |> 
   filter(state %in% my_states,
-         year %in% 2015:2020) # só até 2020, pois a nova contém a partir de 2021)</code></pre>
-</div>
-</div>
-</div>
-<div id="incorporando-bases-climate-trace-setores" class="section level3">
-<h3>Incorporando bases Climate TRACE setores</h3>
-<pre class="r"><code>climate_trace_setores &lt;- emissions_sources_15_20_setores |&gt; 
-  full_join(emissions_sources_21_25_setores,
-            by = c(&quot;year&quot;, &quot;state&quot;, &quot;city_ref&quot;, &quot;residuos&quot;, &quot;agricultura&quot;, &quot;florestas_e_uso_da_terra&quot;, &quot;manufatura&quot;, &quot;transporte&quot;, &quot;extracao_mineral&quot;, &quot;energia&quot;, &quot;operacoes_de_combustiveis_fosseis&quot;))
+         year %in% 2015:2020) # só até 2020, pois a nova contém a partir de 2021)
+```
 
-# write_rds(climate_trace_setores, &#39;../data/climate_trace_setores.rds&#39;)</code></pre>
-</div>
-<div id="incorporando-bases-climate-trace-subsetores" class="section level3">
-<h3>Incorporando bases Climate TRACE subsetores</h3>
-<pre class="r"><code>climate_trace_subsetores &lt;- emissions_sources_15_20_subsetores |&gt; 
-  full_join(emissions_sources_21_25_subsetores,
-            by = c(&quot;year&quot;, &quot;state&quot;, &quot;city_ref&quot;, &quot;aplicacao_de_fertilizantes_sinteticos&quot;,
-      &quot;aviacao_domestica&quot;,
-      &quot;aviacao_internacional&quot;,
-      &quot;cultivo_de_arroz&quot;,
-      &quot;esterco_deixado_no_pasto_gado&quot;,
-      &quot;fermentacao_enterica_gado_a_pasto&quot;,
-      &quot;fermentacao_enterica_gado_confinado&quot;,
-      &quot;queimadas_em_areas_agricolas&quot;,
-      &quot;remocoes_de_carbono_sequestro&quot;,
-      &quot;transporte_rodoviario&quot;,
-      &quot;tratamento_e_descarte_de_esgoto_domestico&quot;,
-      &quot;uso_liquido_de_terras_florestais&quot;,
-      &quot;uso_liquido_de_areas_arbustivas_e_gramineas&quot;,
-      &quot;uso_liquido_de_areas_umidas&quot;,
-      &quot;geracao_de_eletricidade&quot;,
-      &quot;disposicao_de_residuos_solidos&quot;,
-      &quot;mineracao_de_cobre&quot;,
-      &quot;producao_de_cimento&quot;,
-      &quot;producao_de_petroleo_e_gas&quot;,
-      &quot;reservatorios_de_agua&quot;,
-      &quot;navegacao_domestica&quot;,
-      &quot;navegacao_internacional&quot;,
-      &quot;industria_de_papel_e_celulose&quot;,
-      &quot;industria_siderurgica&quot;,
-      &quot;mineracao_de_ferro&quot;,
-      &quot;mineracao_de_bauxita&quot;,
-      &quot;industria_quimica&quot;,
-      &quot;mineracao_de_carvao&quot;,
-      &quot;producao_de_aluminio&quot;,
-      &quot;transporte_de_petroleo_e_gas&quot;,
-      &quot;manejo_de_esterco_gado_confinado&quot;))
+### Incorporando bases Climate TRACE setores
+
+
+``` r
+# climate_trace_setores <- emissions_sources_15_20_setores |> 
+#   full_join(emissions_sources_21_25_setores,
+#             by = c("year", "state", "city_ref", "residuos", "agricultura", "florestas_e_uso_da_terra", "manufatura", "transporte", "extracao_mineral", "energia", "operacoes_de_combustiveis_fosseis"))
+
+# write_rds(climate_trace_setores, '../data/climate_trace_setores.rds')
+```
+
+
+### Incorporando bases Climate TRACE subsetores
+
+
+``` r
+# climate_trace_subsetores <- emissions_sources_15_20_subsetores |> 
+#   full_join(emissions_sources_21_25_subsetores,
+#             by = c("year", "state", "city_ref", "aplicacao_de_fertilizantes_sinteticos",
+#       "aviacao_domestica",
+#       "aviacao_internacional",
+#       "cultivo_de_arroz",
+#       "esterco_deixado_no_pasto_gado",
+#       "fermentacao_enterica_gado_a_pasto",
+#       "fermentacao_enterica_gado_confinado",
+#       "queimadas_em_areas_agricolas",
+#       "remocoes_de_carbono_sequestro",
+#       "transporte_rodoviario",
+#       "tratamento_e_descarte_de_esgoto_domestico",
+#       "uso_liquido_de_terras_florestais",
+#       "uso_liquido_de_areas_arbustivas_e_gramineas",
+#       "uso_liquido_de_areas_umidas",
+#       "geracao_de_eletricidade",
+#       "disposicao_de_residuos_solidos",
+#       "mineracao_de_cobre",
+#       "producao_de_cimento",
+#       "producao_de_petroleo_e_gas",
+#       "reservatorios_de_agua",
+#       "navegacao_domestica",
+#       "navegacao_internacional",
+#       "industria_de_papel_e_celulose",
+#       "industria_siderurgica",
+#       "mineracao_de_ferro",
+#       "mineracao_de_bauxita",
+#       "industria_quimica",
+#       "mineracao_de_carvao",
+#       "producao_de_aluminio",
+#       "transporte_de_petroleo_e_gas",
+#       "manejo_de_esterco_gado_confinado"))
       
       # Presentes apenas em 21–23:
-      # &quot;residuos_de_culturas_agricolas&quot;,
-      # &quot;uso_de_combustivel_em_edificacoes_nao_residenciais,
-      # &quot;uso_de_combustivel_em_edificacoes_residenciais&quot;,
-      # &quot;industria_textil,_couro_e_vestuario&quot;,
-      # &quot;refino_de_petroleo_e_gas&quot;,
-      # &quot;craqueamento_a_vapor_petroquimico&quot;,
-      # &quot;tratamento_e_descarte_de_efluentes_industriais&quot;,
+      # "residuos_de_culturas_agricolas",
+      # "uso_de_combustivel_em_edificacoes_nao_residenciais,
+      # "uso_de_combustivel_em_edificacoes_residenciais",
+      # "industria_textil,_couro_e_vestuario",
+      # "refino_de_petroleo_e_gas",
+      # "craqueamento_a_vapor_petroquimico",
+      # "tratamento_e_descarte_de_efluentes_industriais",
       # 
       # # Presentes apenas em 15–20:
-      # &quot;degradacao_em_terras_florestais&quot;,
-      # &quot;desmatamento_em_terras_florestais&quot;,
-      # &quot;queimadas_em_terras_florestais&quot;,
-      # &quot;queimadas_em_areas_arbustivas&quot;,
-      # &quot;queimadas_em_areas_umidas&quot;
+      # "degradacao_em_terras_florestais",
+      # "desmatamento_em_terras_florestais",
+      # "queimadas_em_terras_florestais",
+      # "queimadas_em_areas_arbustivas",
+      # "queimadas_em_areas_umidas"
 
 # names(emissions_sources_21_23_subsetores)
 # names(emissions_sources_15_20_subsetores)
 
-# write_rds(climate_trace_subsetores, &#39;../data/climate_trace_subsetores.rds&#39;)</code></pre>
+# write_rds(climate_trace_subsetores, '../data/climate_trace_subsetores.rds')
+```
+
+
+-->
 </div>
 <div id="entrada-com-a-base-nasa-xco2.rds" class="section level3">
 <h3>💨 Entrada com a Base: <code>nasa-xco2.rds</code></h3>
@@ -695,7 +712,7 @@ pol_df &lt;- states |&gt; filter(abbrev_state == &quot;DF&quot;) |&gt;
 </div>
 <div id="gerar-mapa" class="section level4">
 <h4>Gerar mapa</h4>
-<pre class="r"><code>my_year = 2020
+<pre class="r"><code>my_year = 2021
 municipality |&gt; 
   filter(abbrev_state %in% my_states) |&gt; 
   left_join(
@@ -770,11 +787,11 @@ vari_exp &lt;- gstat::variogram(form, data = df_aux,
                       cressie = FALSE, #estimador clássico do semivar.
                       cutoff = 1, # distância máxima = 8
                       width = 0.075) # distancia entre pontos
-vari_exp  |&gt;
-  ggplot(aes(x=dist, y=gamma)) +
-  geom_point() +
-  labs(x=&quot;lag (º)&quot;,
-       y=expression(paste(gamma,&quot;(h)&quot;)))</code></pre>
+# vari_exp  |&gt;
+#   ggplot(aes(x=dist, y=gamma)) +
+#   geom_point() +
+#   labs(x=&quot;lag (º)&quot;,
+#        y=expression(paste(gamma,&quot;(h)&quot;)))</code></pre>
 <pre class="r"><code>patamar=1.4
 alcance=0.2
 epepita=0.5
@@ -782,7 +799,84 @@ modelo_1 &lt;- fit.variogram(vari_exp,vgm(patamar,&quot;Sph&quot;,alcance,epepit
 modelo_2 &lt;- fit.variogram(vari_exp,vgm(patamar,&quot;Exp&quot;,alcance,epepita))
 modelo_3 &lt;- fit.variogram(vari_exp,vgm(patamar,&quot;Gau&quot;,alcance,epepita))
 plot_my_models(modelo_1,modelo_2,modelo_3)
-modelo &lt;- modelo_2 ## sempre modificar</code></pre>
+modelo &lt;- modelo_2 ## sempre MODIFICAR</code></pre>
+</div>
+<div id="selecionado-o-melhor-modelo-vamos-guardá-lo" class="section level4">
+<h4>✅ Selecionado o melhor modelo, vamos guardá-lo</h4>
+<p>Este chunk do código tem por objetivo selecionar o melhor modelo dos
+semivariogramas experimentais para as diferentes variáveis. Assim, pode
+ser “reutilizado” para qualquer uma das variáveis analisadas, desde que,
+sejam as variáveis espaciais estimadas pela krigaem ordinária, rode o
+novo semivariograma desejado e altere:</p>
+<p><em>1. O modelo</em> - ~ Linha 472 (já será alterado ao rodar o novo
+semivariograma) <em>2. A variável</em> - ~ Linha 543 e 547 <em>3. O nome
+do arquivo salvo</em> - ~ Linha 547</p>
+<p><code>O novo semivariograma a ser rodado deve abranger, por exemplo, desde a linha 784 à 904.</code></p>
+<p><code>As variáveis krigadas foram: XCO2, XCH4, SIF e as do NASA POWER - A base do AppEEARS não foi krigada pois o sensor abrangeu quase que integralmente todos os municípios</code></p>
+<pre class="r"><code># Extraindo dos parâmetros dos modelos
+sqr.f1 &lt;- round(attr(modelo_1, &quot;SSErr&quot;), 4)
+c01    &lt;- round(modelo_1$psill[[1]], 4)
+c0_c11 &lt;- round(sum(modelo_1$psill), 4)
+a1     &lt;- round(modelo_1$range[[2]], 2)
+
+sqr.f2 &lt;- round(attr(modelo_2, &quot;SSErr&quot;), 4)
+c02    &lt;- round(modelo_2$psill[[1]], 4)
+c0_c12 &lt;- round(sum(modelo_2$psill), 4)
+a2     &lt;- round(3 * modelo_2$range[[2]], 2)
+
+sqr.f3 &lt;- round(attr(modelo_3, &quot;SSErr&quot;), 4)
+c03    &lt;- round(modelo_3$psill[[1]], 4)
+c0_c13 &lt;- round(sum(modelo_3$psill), 4)
+a3     &lt;- round(modelo_3$range[[2]] * sqrt(3), 2)
+
+# Cálculo dos R² para cada modelo
+df_aux &lt;- vari_exp |&gt;
+  mutate(
+    gamma_m1 = ifelse(dist &lt;= a1,
+                      c01 + (c0_c11 - c01) * (1.5*(dist/a1) - 0.5*(dist/a1)^3),
+                      c0_c11),
+
+    gamma_m2 = c02 + (c0_c12 - c02) * (1 - exp(-3 * (dist/a2))),
+
+    gamma_m3 = c03 + (c0_c13 - c03) * (1 - exp(-3 * (dist/a3)^2)),
+
+    residuo_total = (gamma - mean(gamma))^2,
+    residuo_mod_1 = (gamma - gamma_m1)^2,
+    residuo_mod_2 = (gamma - gamma_m2)^2,
+    residuo_mod_3 = (gamma - gamma_m3)^2
+  ) |&gt;
+  summarise(
+    r2_1 = (sum(residuo_total) - sum(residuo_mod_1)) / sum(residuo_total),
+    r2_2 = (sum(residuo_total) - sum(residuo_mod_2)) / sum(residuo_total),
+    r2_3 = (sum(residuo_total) - sum(residuo_mod_3)) / sum(residuo_total)
+  )
+
+r21 &lt;- as.vector(round(df_aux[1], 4))
+r22 &lt;- as.vector(round(df_aux[2], 4))
+r23 &lt;- as.vector(round(df_aux[3], 4))
+
+# Salvando os parâmetros dos melhores modelo
+model &lt;- modelo |&gt; slice(2) |&gt; pull(model)
+rss &lt;- round(attr(modelo, &quot;SSErr&quot;),4) # Extrai SSErr (Sum of Squared Errors) do modelo
+c0 &lt;- round(modelo$psill[[1]],4) # psill[[1]] = o nugget (C0)
+c0_c1 &lt;- round(sum(modelo$psill),4) # Soma patamar + efeito pepita = sill total 
+a &lt;- ifelse(model == &quot;Gau&quot;, round(modelo$range[[2]]*(3^.5),2),
+            ifelse(model == &quot;Exp&quot;,round(3*modelo$range[[2]],2),
+            round(modelo$range[[2]],2))) # alcance ajustado conforme modelo (alcance efetivo)
+r2 &lt;- ifelse(model == &quot;Gau&quot;, r23,
+            ifelse(model == &quot;Exp&quot;,r22,
+            r21)) |&gt; pluck(1) # R quadrado
+tibble( #criando tibble com todos os resultados
+  my_states, my_year, model, c0, c0_c1, a, rss, r2
+) |&gt; mutate(gde = c0/c0_c1, .after = &quot;a&quot;) |&gt;
+  rename(state=my_states,year=my_year) |&gt; 
+  write_csv(paste0(&quot;../output/&quot;,paste(my_states,
+                                            collapse = &quot;_&quot;), 
+                   &quot;-&quot;,my_year,&quot;-xco2.csv&quot;)) # MODIFICAR variável
+
+ls_csv &lt;- list.files(&quot;../output/&quot;,full.names = TRUE,pattern = &quot;-xco2.csv&quot;) # MODIFICAR
+map_df(ls_csv, read_csv) |&gt; 
+  writexl::write_xlsx(&quot;../output/semivariogram-models-xco2.xlsx&quot;) # MODIFICAR</code></pre>
 <pre class="r"><code>ko_variavel &lt;- krige(formula=form, df_aux, grid_geral, model=modelo,
                      block=c(0.1,0.1),
                      nsim=0,
@@ -1012,7 +1106,7 @@ glimpse(gosat_xch4)</code></pre>
 <h4>Gerar mapa</h4>
 <pre class="r"><code>gosat_xch4 &lt;- read_rds(&quot;../data/gosat_xch4.rds&quot;) # os arquivos com underline foram tratados, classificados por município e deverão ser repassados para a pasta data futuramente
 
-my_year = 2021
+my_year = 2020
 municipality |&gt; 
   filter(abbrev_state %in% my_states) |&gt; 
   left_join(
@@ -1321,7 +1415,7 @@ glimpse(oco2_sif)</code></pre>
   geom_point()</code></pre>
 <div id="gerar-mapa-2" class="section level4">
 <h4>Gerar mapa</h4>
-<pre class="r"><code>my_year = 2022
+<pre class="r"><code>my_year = 2020
 municipality |&gt; 
   filter(abbrev_state %in% my_states) |&gt; 
   left_join(
@@ -1638,7 +1732,7 @@ glimpse(appeears_modis)</code></pre>
   geom_point()</code></pre>
 <div id="gerar-mapas-das-variáveis---appeears" class="section level4">
 <h4>Gerar mapas das variáveis - appeears</h4>
-<pre class="r"><code># my_year = 2021
+<pre class="r"><code># my_year = 2020
 
 # Definir a variável
 variavel &lt;- &quot;media_lai&quot; # &lt;-- mudar
@@ -1756,7 +1850,7 @@ glimpse(nasa_power)
 </div>
 <div id="gerar-mapa-3" class="section level4">
 <h4>Gerar mapa</h4>
-<pre class="r"><code>my_year &lt;- 2022
+<pre class="r"><code>my_year &lt;- 2020
 
 # Atribuir ao objeto &quot;variavel&quot; a variável climática da base do nasa power que iremos trabalhar
   # Radiacao 
@@ -1767,7 +1861,7 @@ glimpse(nasa_power)
   # Pressao
 
 # Definir variável
-variavel &lt;- &quot;Pressao&quot; #mudar
+variavel &lt;- &quot;Temperatura&quot; #mudar
 
 # Estabelecer anos
 anos &lt;- 2015:2023
@@ -2041,7 +2135,7 @@ nome_variavel &lt;- map_df(2015:2023,~{
         mutate(year = .x)
   return(df_final)
 })
-write_rds(nome_variavel,paste0(&quot;../data-raw/nasa-power-&quot;,variavel,&quot;-kgr.rds&quot;))</code></pre>
+# write_rds(nome_variavel,paste0(&quot;../data-raw/nasa-power-&quot;,variavel,&quot;-kgr.rds&quot;))</code></pre>
 <pre class="r"><code># Rodar somente quando necessário!!!!
 nasa_power_kgr &lt;- read_rds(paste0(&quot;../data-raw/nasa-power-&quot;,variavel,&quot;-kgr.rds&quot;))</code></pre>
 <pre class="r"><code>nasa_power_bind &lt;- nasa_power |&gt; 
@@ -2316,7 +2410,8 @@ munic_geobr |&gt;
 <h4>Gerar mapa - deter (focos de queimadas)</h4>
 <p>Essa é a outra base do deter, que contém somente os focos de
 queimadas por estados</p>
-<p>Análise pouca representativa (somente comentar no relatório)</p>
+<p>Análise pouca representativa (opcionalmente comentar no
+relatório)</p>
 <pre class="r"><code>focos_queimadas &lt;- read_rds((&quot;../data/focos_queimadas.rds&quot;)
 # focos_queimadas &lt;- focos_queimadas |&gt;
 #   rename(abbrev_state = uf)

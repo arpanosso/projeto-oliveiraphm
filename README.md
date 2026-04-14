@@ -224,7 +224,7 @@ base_completa_set <- base_completa_setores |>
 base_completa_subsetores <- read_rds('data/base_completa_subsetores.rds')
 ```
 
-### Tratando outliers dos subsetores… (ainda não refeito para anos pares e ímpares)
+### Tratando outliers dos subsetores…
 
 Mesma lógica que à utilizada para os setores
 
@@ -274,7 +274,7 @@ base_completa_subset_novas_medias <- base_completa_subsetores |>
 # 🔎 Análises
 
 <!--
-### 🧮 Estatística descritiva
+### 🧮 Estatística descritiva (gerada uma vez)
 &#10;
 ``` r
 variavel <- "xch4" # opcional (mudar variavel)
@@ -305,7 +305,7 @@ variaveis <- base_completa_set |>
 writexl::write_xlsx(df, paste0("output/estat-descritiva-",variavel,"_.xlsx"))
 &#10;}
 &#10;```
-&#10;### 📊 Histogramas
+&#10;### 📊 Histogramas (pouco representativos para o objetivo de análise)
 &#10;
 ``` r
 variavel <- "xco2" # mudar
@@ -359,7 +359,7 @@ base_completa_set |>
 base_completa_set |> 
   mutate(
     state = ifelse(state=="DF","GO",state),0) |> 
-  # sample_n(10000) |> 
+  # sample_n(10000) |> # teste
   ggplot(aes(x=year, y=xch4)) +
   geom_point() +
   geom_point(shape=21,color="black",fill="gray") +
@@ -381,14 +381,14 @@ mod_trend_xco2 <- lm(
   xco2 ~ year_adj + city_ref,
   data = base_completa_set_tend |> drop_na(xco2, city_ref)
 )
-mod_trend_xco2
+
 
 # Modelo XCH4
 mod_trend_xch4 <- lm(
   xch4 ~ year_adj + city_ref,
   data = base_completa_set_tend |> drop_na(xch4, city_ref)
 )
-mod_trend_xch4
+
 
 # 2) Previsão da tendência usando os modelos
 
@@ -463,12 +463,13 @@ base_completa_set <- base_completa_set_tend |>
 ```
 
 A base de dados do GOSAT disponibiliza informações de XCH₄ até o ano de
-2021. Para possibilitar a análise de regressão, realizou-se a predição
-dos valores para 2022 e 2023 por meio do método de regressão linear
-simples, utilizando os dados observados no período de 2015 a 2021 como
-base de treinamento.
+2021. Para possibilitar as análises, realizou-se a predição dos valores
+para 2022 e 2023 por meio do método de regressão linear simples,
+utilizando os dados observados no período de 2015 a 2021 como base de
+treinamento.
 
 ``` r
+# Atualizando valores ausentes de xch4 
 city_ref <- base_completa_set$city_ref |> unique()
 
 for(i in seq_along(city_ref)){
@@ -487,6 +488,7 @@ for(i in seq_along(city_ref)){
                            a+year*b,xch4),xch4)
     )}
 }
+
 base_completa_set <- base_completa_set |> 
   group_by(year, state) |> 
   mutate(
@@ -638,20 +640,31 @@ for( i in 2015:2023){
 
 ### 🔎 Análise de correlação - total
 
+Correlação de Pearson
+
 ``` r
 mc <- cor(base_completa_set |>
-                select(anomalia_xco2:queimada, -xch4, -evi,-ndvi), use = "pairwise.complete.obs") # "complete.obs" descarta totalemnte linha com qualquer NA
+            select(anomalia_xco2:queimada, -xch4, -evi, -ndvi)  |> 
+            rename_with(~ str_to_title(.x))|>
+            rename(
+              XCO2 = Anomalia_xco2, XCH4 = Anomalia_xch4, "SIF 757" = Sif_757,
+              LAI = Lai, FPAR = Fpar, Precipitação = Precipitacao, 
+              Radiação = Radiacao, Pressão = Pressao
+            ), use = "complete.obs") # "complete.obs" descarta totalemnte linha com qualquer NA
 corrplot(mc,method = "color",
          outline = TRUE,
-         type = "upper",
+         # type = "upper",
          addgrid.col = "darkgray",cl.pos = "r", tl.col = "black",
-         tl.cex = .8, cl.cex = 1,  bg="azure2",
+         tl.cex = .85, cl.cex = 1,  bg="azure2",
          # diag = FALSE,
          # addCoef.col = "black",
-         cl.ratio = 0.2,
-         cl.length = 5,
-         number.cex = 0.8
+         cl.ratio = 0.15,
+         cl.length = 5
+         # number.cex = 0.5, #tamanho dos n° dentro da matriz
+         # addCoef.col = "black"
 ) 
+
+# "method" da função "cor()" não foi especificado, logo o R usa por padrão a correlação de Pearson. Para utilizar a de postos de Spearman: "method = "spearman", ou ainda a de Kendall: "method = "kendall"".
 ```
 
 ### 🔎 Análise de correlação - ANO
@@ -662,7 +675,7 @@ for( i in 2015:2023){
   # Análise de correlação
   base_aux <- base_completa_set |>
     filter(year == i) |> 
-    select(xco2:desmatamento, -evi, -ndvi,-xco2,-xch4, -temperatura,-sif_757) 
+    select(xco2:queimada, -evi, -ndvi,-xco2,-xch4, -temperatura,-sif_757) 
   
   municipios <-base_completa_set |>
     filter(year == i) |> 
@@ -685,8 +698,8 @@ for( i in 2015:2023){
   
   # Análise de agrupamento
   da_pad <- decostand(base_aux[,fc] |> 
-                        mutate(across(everything(), ~replace_na(., 0))),  # invés de passar NA = 0, não podemos passar a mediana do estado?
-                      method = "standardize",
+                        mutate(across(everything(), ~replace_na(., 0))),  # padronização para média 0 e variância 1 (tornar os pesos das análises iguais)
+                      method = "standardize", # subtrai a média da variável e divide pelo desvio-padrão da variável
                       na.rm=TRUE)
   da_pad_euc <- vegdist(da_pad,"euclidean") 
   da_pad_euc_ward<-hclust(da_pad_euc, method="ward.D")
@@ -700,7 +713,7 @@ for( i in 2015:2023){
        col="blue", las=1,
        cex=.6,lwd=1.5);box();abline(h=d_corte*1.15)
   
-  # Mapaeamento dos Grupos
+  # Mapeamento dos Grupos
   plot_map_group <- municipality |> 
     mutate(
       name_muni = stri_trans_general(tolower(name_muni), "Latin-ASCII"),
@@ -802,7 +815,9 @@ for( i in 2015:2023){
       pcat<-round(tabelapca,3)
       tabelapca<-tabelapca[order(abs(tabelapca[,1])),]
       print(tabelapca)
-      
+  print("======= agrupamento 3 =======")
+  nmg <- as.numeric(names(table(grupo))[(table(grupo) == min(table(grupo)))])
+  grupo[grupo == nmg]
 corr_maps <- plot_map_group + bi_plot + plot_layout(ncol = 2) +
   plot_annotation(title = i)
 
@@ -824,7 +839,11 @@ corr_maps <- plot_map_group + bi_plot + plot_layout(ncol = 2) +
 }
 ```
 
+\<\<\<\<\<\<\< HEAD
+
 <!--
+=======
+>>>>>>> e4dff6a8df46808bdb4654316089ba4d1b40b74d
 ## 🗺️ Mapa de EMISSÃO TOTAL - setores
 &#10;
 ``` r
@@ -898,10 +917,9 @@ map(2015:2023,~{municipality |>
          y = 'Latitude') +
     scale_fill_viridis_c()})
 ```
-&#10;-->
-
+&#10;
 #### 🗺️ Mapa de EMISSÃO TOTAL - setores - Criando classe de emissão
-
+&#10;
 ``` r
 map(2015:2023,~{municipality |> 
     mutate(
@@ -946,8 +964,7 @@ map(2015:2023,~{municipality |>
          y = 'Latitude') +
     scale_fill_viridis_d()})
 ```
-
-<!--
+&#10;<!--
 #### 🗺️ Mapa de EMISSÃO TOTAL - escolher setor
 &#10;
 ``` r
@@ -1354,7 +1371,7 @@ map(2015:2024,~{municipality |>
       legend.text = element_text(size = rel(1), color = "black"),
       legend.title = element_text(face = 'bold', size = rel(1.2))
     ) +
-    labs(fill = 'Agrupamento',
+    labs(fill = 'Remoção de C',
          x = 'Longitude',
          y = 'Latitude') +
     scale_fill_viridis_c()})
